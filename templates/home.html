@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+</head>
+<body>
+  <h1 style="text-align: center; width: 100%">Personal Finance Tracker</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <button onclick="window.location.href = '{{url_for('login_user')}}';">
+        Login
+      </button>
+      &ensp;
+      <button>
+        Register
+      </button>
+    </section>
+    <br>
+    <!-- todo: show these just when the user is logged in -->
+    <!-- User Management Service -->
+    <section style="display: flex; align-items: center; justify-content: center">
+      <button>
+        Get user profile details
+      </button>
+      &ensp;
+      <button>
+        Update user profile
+      </button>
+      &ensp;
+      <button>
+        Delete a user account
+      </button>
+    </section>
+    <br>
+    <!-- todo: show these just when the user is logged in -->
+    <!-- Transaction Service -->
+    <section style="display: flex; align-items: center; justify-content: center">
+      <button>
+        Record a new Transaction
+      </button>
+      &ensp;
+      <button>
+        Retrieve details of specific transaction
+      </button>
+      &ensp;
+      <button>
+        Update a transaction
+      </button>
+      &ensp;
+      <button>
+        Delete a transaction
+      </button>
+    </section>
+    <br>
+    <!-- todo: show these just when the user is logged in -->
+    <!-- Category Service -->
+    <section style="display: flex; align-items: center; justify-content: center">
+      <button>
+        Create a new category
+      </button>
+      &ensp;
+      <button>
+        Retrieve all categories
+      </button>
+      &ensp;
+      <button>
+        Update a category
+      </button>
+      &ensp;
+      <button>
+        Delete a category
+      </button>
+    </section>
+  </main>
+</body>
+</html>
