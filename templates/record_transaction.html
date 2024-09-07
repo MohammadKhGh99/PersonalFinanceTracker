@@ -2,9 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>Record Transaction</title>
 </head>
-<body>
+<style>
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 
+</style>
+<body>
+  <h1 style="text-align: center; width: 100%">Record Transaction</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <form action="{{url_for('record_transaction')}}" method="post">
+        <div>
+          <label for="user_id">User ID</label>
+          <input type="number" name="user_id" id="user_id" required>
+        </div>
+        <br>
+        <div>
+          <label for="amount">Amount</label>
+          <input type="number" name="amount" id="amount" required>
+        </div>
+        <br>
+        <div>
+          <label for="type">Type</label>
+          <select name="type" id="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <br>
+        <div>
+          <label for="category_id">Category</label>
+          <input type="text" name="category_id" id="category_id">
+        </div>
+        <br>
+        <div>
+          <label for="description">Description</label>
+          <input type="text" name="description" id="description" required>
+        </div>
+        <br>
+        <div>
+          <label for="date">Date</label>
+          <input type="date" name="date" id="date" required>
+        </div>
+        <br>
+        <button type="submit">
+          Record Transaction
+        </button>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

@@ -8,26 +8,24 @@
   <h1 style="text-align: center; width: 100%">Personal Finance Tracker</h1>
   <main>
     <section style="display: flex; align-items: center; justify-content: center">
-      <button onclick="window.location.href = '{{url_for('login_user')}}';">
+      <button onclick="window.location.href = '{{url_for(\'login_user\')}}';">
         Login
       </button>
       &ensp;
-      <button>
+      <button onclick="window.location.href = '{{url_for(\'register_user\')}}';">
         Register
       </button>
     </section>
     <br>
     <!-- todo: show these just when the user is logged in -->
     <!-- User Management Service -->
-    <section style="display: flex; align-items: center; justify-content: center">
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
       <button>
         Get user profile details
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Update user profile
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Delete a user account
       </button>
@@ -35,19 +33,19 @@
     <br>
     <!-- todo: show these just when the user is logged in -->
     <!-- Transaction Service -->
-    <section style="display: flex; align-items: center; justify-content: center">
-      <button>
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
+      <button onclick="window.location.href = '{{url_for(\'record_transaction\')}}';">
         Record a new Transaction
-      </button>
-      &ensp;
-      <button>
-        Retrieve details of specific transaction
-      </button>
-      &ensp;
+      </button><br>
+      <div>
+        <input type="number" name="transaction_id" id="transaction_id" style="width: 50px" required>
+        <button onclick="window.location.href = '/transactions/' + document.getElementById('transaction_id').value;">
+          Get transaction
+        </button>
+      </div><br>
       <button>
         Update a transaction
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Delete a transaction
       </button>
@@ -55,22 +53,19 @@
     <br>
     <!-- todo: show these just when the user is logged in -->
     <!-- Category Service -->
-    <section style="display: flex; align-items: center; justify-content: center">
-      <button>
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
+      <button onclick="window.location.href = '{{url_for('create_category')}}';">
         Create a new category
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Retrieve all categories
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Update a category
-      </button>
-      &ensp;
+      </button><br>
       <button>
         Delete a category
-      </button>
+      </button><br>
     </section>
   </main>
 </body>

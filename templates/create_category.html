@@ -2,9 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>Create Category</title>
 </head>
 <body>
-
+  <h1 style="text-align: center; width: 100%">Create Category</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <form action="{{url_for('create_category')}}" method="post">
+        <div>
+          <label for="user_id">User ID</label>
+          <input type="text" name="user_id" id="user_id" required>
+        </div>
+        <br>
+        <div>
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" required>
+        </div>
+        <br>
+        <div>
+          <label for="description">Description</label>
+          <input type="text" name="description" id="description">
+        </div>
+        <br>
+        <button type="submit">
+          Create Category
+        </button>
+      </form>
+    </section>
+  </main>
 </body>
 </html>

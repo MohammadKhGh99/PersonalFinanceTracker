@@ -2,9 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <title>Registration</title>
 </head>
 <body>
-
+  <h1 style="text-align: center; width: 100%">Register</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <form action="{{url_for('register_user')}}" method="post">
+        <div>
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" required>
+        </div>
+        <br>
+        <div>
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" required>
+        </div>
+        <br>
+<!--        <div>-->
+<!--          <label for="password">Password</label>-->
+<!--          <input type="password" name="password" id="password" required>-->
+<!--        </div>-->
+<!--        <br>-->
+        <div>
+          <label for="preferences">Preferences</label>
+          <input type="text" name="preferences" id="preferences" required>
+        </div>
+        <br>
+        <button type="submit">
+          Register
+        </button>
+      </form>
+    </section>
+  </main>
 </body>
 </html>
