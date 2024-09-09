@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update Transaction Details</title>
+</head>
+<body>
+  <h1 style="text-align: center; width: 100%">Update Transaction Details</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <form onsubmit="updateTransaction(event)">
+        <div>
+          <label for="user_id">User ID</label>
+          <input type="text" name="user_id" id="user_id" value="{{transaction.user_id}}" style="width: 400px;" required>
+        </div><br>
+        <div>
+          <label for="amount">Amount</label>
+          <input type="email" name="amount" id="amount" value="{{transaction.amount}}" style="width: 400px;" required>
+        </div><br>
+        <div>
+          <label for="date">Date</label>
+          <input type="date" name="date" id="date" value="{{transaction.date}}" required>
+        </div><br>
+        <div>
+          <label for="category_id">Category ID</label>
+          <input type="number" name="category_id" id="category_id" value="{{transaction.category_id}}" required>
+        </div><br>
+        <div>
+          <label for="type">Type</label>
+          <input type="text" name="type" id="type" value="{{transaction.type}}" required>
+        </div><br>
+        <div>
+          <label for="description">Description</label>
+          <input type="text" name="description" id="description" value="{{transaction.description}}" required>
+        </div><br>
+        <button type="submit">
+            Update transaction
+        </button>
+        <script>
+        async function updateTransaction(event) {
+            event.preventDefault();
+            let transactionArray = {};
+            transactionArray['transaction_id'] = "{{transaction.transaction_id}}";
+            let allDiv = form.querySelectorAll('div');
+            for (let i = 0; i < allDiv.length; i++) {
+              const curInput = allDiv[i].querySelector('input');  
+              transactionArray[curInput.name] = curInput.value;
+            }
+            // Perform the PUT request
+            const response = await fetch("/transactions/{{transaction.transaction_id}}", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(transactionArray)
+              });
+        }
+        </script>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

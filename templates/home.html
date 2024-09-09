@@ -4,69 +4,216 @@
   <meta charset="UTF-8">
   <title>Home</title>
 </head>
+<style>
+  button {
+    cursor: pointer;
+  }
+  section {
+    margin-bottom: 40px;
+  }
+  hr {
+    margin: 0;
+    width: 50%; 
+    border: 2px dashed black;
+  }
+</style>
 <body>
   <h1 style="text-align: center; width: 100%">Personal Finance Tracker</h1>
-  <main>
+  <main style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+    <h4>
+      Login / Register
+    </h4>
     <section style="display: flex; align-items: center; justify-content: center">
-      <button onclick="window.location.href = '{{url_for(\'login_user\')}}';">
+      <script>
+        function goToLogin() {
+          const loginStr = "{{url_for('login_user')}}";
+          window.location.href = loginStr;
+        }
+        function goToRegister() {
+          const registerStr = "{{url_for('register_user')}}";
+          window.location.href = registerStr;
+        }
+      </script>
+      <button onclick="goToLogin()">
         Login
       </button>
       &ensp;
-      <button onclick="window.location.href = '{{url_for(\'register_user\')}}';">
+      <button onclick="goToRegister()">
         Register
       </button>
     </section>
-    <br>
+    <hr>
     <!-- todo: show these just when the user is logged in -->
     <!-- User Management Service -->
+    <h4>
+      User Management Service
+    </h4>
     <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
-      <button>
-        Get user profile details
-      </button><br>
-      <button>
-        Update user profile
-      </button><br>
-      <button>
-        Delete a user account
-      </button>
+      <div>
+        <input type="number" placeholder="User ID" name="user_id" id="user_id" style="width: 150px" required>
+        <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/users/' + document.getElementById('user_id').value}">
+          Get user profile details
+        </button>
+      </div><br>
+      <div>
+        <input type="number" placeholder="User ID" name="user_id" id="user_id_update" style="width: 150px" required>
+        <button onclick="goToUpdateUser(this)">
+          Update user profile
+        </button>
+        <script>
+          function goToUpdateUser(button){
+            const userId = button.parentNode.children[0].value;
+            if (userId){
+              const updateStr = `/users/${userId}`;
+              window.location.href = updateStr;
+            }
+          }
+        </script>
+      </div><br>
+      <form onsubmit="deleteUserProfile(event, this)">
+        <input type="number" placeholder="User ID" name="user_id" id="user_id_delete" style="width: 150px" required>
+        <button>
+          Delete a user account
+        </button>
+        <script>
+          async function deleteUserProfile(event, form) {
+              const confirmDelete = confirm("Are you sure you want to delete this user account?");
+              if (!confirmDelete) {
+                  event.preventDefault();
+                  return;
+              }
+              event.preventDefault();
+              const userId = form.children[0].value;
+              // Perform the DELETE request
+              const response = await fetch(`/users/${userId}`, {
+                  method: 'DELETE'
+              });
+          }
+        </script>
+      </form>
     </section>
-    <br>
+    <hr>
     <!-- todo: show these just when the user is logged in -->
     <!-- Transaction Service -->
+    <h4>
+      Transaction Service
+    </h4>
     <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
-      <button onclick="window.location.href = '{{url_for(\'record_transaction\')}}';">
+      <button onclick="goToRecordTransaction()">
         Record a new Transaction
       </button><br>
+      <script>
+        function goToRecordTransaction() {
+          const recordStr = "{{url_for('record_transaction')}}";
+          window.location.href = recordStr;
+        }
+      </script>
       <div>
-        <input type="number" name="transaction_id" id="transaction_id" style="width: 50px" required>
-        <button onclick="window.location.href = '/transactions/' + document.getElementById('transaction_id').value;">
+        <input type="number" name="transaction_id" id="transaction_id" placeholder="Transaction ID" style="width: 150px" required>
+        <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/transactions/' + this.parentNode.children[0].value;}">
           Get transaction
         </button>
       </div><br>
-      <button>
-        Update a transaction
-      </button><br>
-      <button>
-        Delete a transaction
-      </button>
+      <div>
+        <input type="number" name="transaction_id" id="transaction_id_update" placeholder="Transaction ID" style="width: 150px" required>
+        <button onclick="goToUpdateTransaction(this)">
+          Update a transaction
+        </button>
+        <script>
+          function goToUpdateTransaction(button){
+            const transactionId = button.parentElement.children[0].value;
+            if (transactionId){
+              const updateStr = `/transactions/${transactionId}`;
+              window.location.href = updateStr;
+            }
+          }
+        </script>
+      </div><br>
+      <form onsubmit="deleteTransaction(event, this)">
+        <input type="number" placeholder="Transaction ID" name="transaction_id" id="transaction_id_delete" style="width: 150px" required>
+        <button>
+          Delete a transaction account
+        </button>
+        <script>
+          async function deleteTransactionProfile(event, form) {
+              const confirmDelete = confirm("Are you sure you want to delete this transaction?");
+              if (!confirmDelete) {
+                  event.preventDefault();
+                  return;
+              }
+              event.preventDefault();
+              const transactionId = form.children[0].value;
+              // Perform the DELETE request
+              const response = await fetch(`/transactions/${transactionId}`, {
+                  method: 'DELETE'
+              });
+          }
+        </script>
+      </form>
     </section>
-    <br>
+    <hr>
     <!-- todo: show these just when the user is logged in -->
     <!-- Category Service -->
+    <h4>
+      Category Service
+    </h4>
     <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
-      <button onclick="window.location.href = '{{url_for('create_category')}}';">
+      <script>
+        function goToCreateCategory() {
+          const createStr = "{{url_for('create_category')}}";
+          window.location.href = createStr;
+        }
+      </script>
+      <button onclick="goToCreateCategory()">
         Create a new category
       </button><br>
-      <button>
+      <button onclick="goToGetCategory()">
         Retrieve all categories
       </button><br>
-      <button>
-        Update a category
-      </button><br>
-      <button>
-        Delete a category
-      </button><br>
+      <script>
+        function goToGetCategory() {
+          const getStr = "{{url_for('get_categories')}}";
+          window.location.href = getStr;
+        }
+      </script>
+      <div>
+        <input type="number" name="category_id" id="category_id_update" placeholder="Category ID" style="width: 150px" required>
+        <button onclick="goToUpdateCategory(this)">
+          Update a category
+        </button>
+        <script>
+          function goToUpdateCategory(button){
+            const categoryId = button.parentElement.children[0].value;
+            if (categoryId){
+              const updateStr = `/categories/${categoryId}`;
+              window.location.href = updateStr;
+            }
+          }
+        </script>
+      </div><br>
+      <form onsubmit="deleteCategoryProfile(event, this)">
+        <input type="number" placeholder="Category ID" name="category_id" id="category_id_delete" style="width: 150px" required>
+        <button>
+          Delete a category
+        </button>
+        <script>
+          async function deleteCategoryProfile(event, form) {
+              const confirmDelete = confirm("Are you sure you want to delete this category?");
+              if (!confirmDelete) {
+                  event.preventDefault();
+                  return;
+              }
+              event.preventDefault();
+              const categoryId = form.children[0].value;
+              // Perform the DELETE request
+              const response = await fetch(`/categories/${categoryId}`, {
+                  method: 'DELETE'
+              });
+          }
+        </script>
+      </form>
     </section>
+    <hr><br>
   </main>
 </body>
 </html>

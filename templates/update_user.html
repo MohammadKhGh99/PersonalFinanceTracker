@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Update User Details</title>
+</head>
+<body>
+  <h1 style="text-align: center; width: 100%">Update User Details</h1>
+  <main>
+    <section style="display: flex; align-items: center; justify-content: center">
+      <form onsubmit="updateUserProfile(event, this)">
+        <div>
+          <label for="name">Name</label>
+          <input type="text" name="name" id="name" value="{{user.name}}" style="width: 400px;" required>
+        </div>
+        <br>
+        <div>
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" value="{{user.email}}" style="width: 400px;" required>
+        </div>
+        <br>
+        <div>
+          <label for="preferences">Preferences</label>
+          <input type="text" name="preferences" id="preferences" value="{{user.preferences}}" required>
+        </div>
+        <br>
+        <button type="submit">
+            Update user profile
+        </button>
+        <script>
+        async function updateUserProfile(event, form) {
+            event.preventDefault();
+            let userArray = {};
+            userArray['user_id'] = "{{user.user_id}}";
+            let allDiv = form.querySelectorAll('div');
+            for (let i = 0; i < allDiv.length; i++) {
+                const curInput = allDiv[i].querySelector('input');
+                userArray[curInput.name] = curInput.value;
+            }
+            // Perform the PUT request
+            const response = await fetch("/users/{{user.user_id}}", {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userArray)
+            });
+        }
+        </script>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

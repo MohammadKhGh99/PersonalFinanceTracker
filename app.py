@@ -4,7 +4,7 @@ import boto3
 from flask import render_template, request, jsonify
 from sqlalchemy.orm import DeclarativeBase, mapped_column, sessionmaker
 from sqlalchemy import (Column, String, Integer, JSON, ForeignKey, DateTime,
-                        create_engine)
+                        create_engine, Float)
 
 app = flask.Flask(__name__)
 engine = create_engine('sqlite:///finance.db')
@@ -33,7 +33,7 @@ class Transaction(Base):
     __tablename__ = 'transactions'
     transaction_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = mapped_column(ForeignKey("users.user_id"))
-    amount = Column(Integer)
+    amount = Column(Float)
     date = Column(String)
     category_id = mapped_column(ForeignKey("categories.category_id"))
     type = Column(String)
@@ -80,6 +80,19 @@ def register_user():
     """
     if request.method == 'GET':
         return render_template('register_user.html')
+    try:
+        new_user = User(
+            email=request.form["email"],
+            name=request.form["name"],
+            preferences=request.form["preferences"]
+        )
+        session.add(new_user)
+        session.commit()
+        return jsonify({'message': 'User created successfully',
+                        'user_id': new_user.user_id}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('users')
     # item = {
@@ -93,18 +106,6 @@ def register_user():
     # }
     # table.put_item(Item=item)
     # print("User added successfully!")
-    try:
-        new_user = User(
-            email=request.form["email"],
-            name=request.form["name"],
-            preferences=request.form["preferences"]
-        )
-        session.add(new_user)
-        session.commit()
-        return jsonify({'message': 'User created successfully',
-                        'user_id': new_user.user_id}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
 
 
 @app.route('/users/<user_id>', methods=['GET'])
@@ -112,6 +113,12 @@ def get_user(user_id):
     """
     Get user profile details.
     """
+    user = session.get(User, user_id)
+    if user:
+        return render_template('update_user.html', user=user), 201
+    else:
+        return jsonify({'error': 'Transaction not found'}), 404
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('users')
     # response = table.get_item(
@@ -120,11 +127,6 @@ def get_user(user_id):
     #     }
     # )
     # return response['Item']
-    user = session.query(User).get(user_id)
-    if user:
-        return repr(user), 201
-    else:
-        return jsonify({'error': 'Transaction not found'}), 404
 
 
 @app.route('/users/<user_id>', methods=['PUT'])
@@ -132,6 +134,22 @@ def update_user(user_id):
     """
     Update user profile.
     """
+    user = session.get(User, user_id)
+    if user:
+        try:
+            # Retrieve the JSON data from the request
+            data = request.get_json()
+            user.email = data.get('email')  # Use .get() to avoid KeyError
+            user.name = data.get('name')  # Use .get() to avoid KeyError
+            user.preferences = data.get('preferences')
+
+            session.commit()
+            return jsonify({'message': 'User updated successfully'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'User not found'}), 404
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('users')
     # table.update_item(
@@ -144,20 +162,6 @@ def update_user(user_id):
     #     }
     # )
     # print("User updated successfully!")
-    user = session.query(User).get(user_id)
-    if user:
-        try:
-            user.email = request.form['email']
-            user.name = request.form['name']
-            user.preferences = request.form['preferences']
-
-            session.commit()
-            return jsonify({'message': 'User updated successfully'}), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return jsonify({'error': 'User not found'}), 404
-
 
 
 @app.route('/users/<user_id>', methods=['DELETE'])
@@ -165,16 +169,7 @@ def delete_user(user_id):
     """
     Delete a user.
     """
-    # dynamodb = boto3.resource('dynamodb')
-    # table = dynamodb.Table('users')
-    # table.delete_item(
-    #     Key={
-    #         'user_id': int(user_id)
-    #     }
-    # )
-    # print("User deleted successfully!")
-    
-    user = session.query(User).get(user_id)
+    user = session.get(User, user_id)
     if user:
         try:
             session.delete(user)
@@ -184,7 +179,16 @@ def delete_user(user_id):
             return jsonify({'error': str(e)}), 400
     else:
         return jsonify({'error': 'User not found'}), 404
-
+    
+    # dynamodb = boto3.resource('dynamodb')
+    # table = dynamodb.Table('users')
+    # table.delete_item(
+    #     Key={
+    #         'user_id': int(user_id)
+    #     }
+    # )
+    # print("User deleted successfully!")
+    
 
 @app.route('/users/login', methods=['GET', 'POST'])
 def login_user():
@@ -192,7 +196,7 @@ def login_user():
     Login a user.
     """
     if request.method == 'POST':
-        # TODO - Implement login logic
+        # todo - Implement login logic
         return "User logged in successfully!"
     else:
         return "Please login to access the application."
@@ -205,19 +209,6 @@ def record_transaction():
      Record a new transaction.
     """
     if request.method == 'POST':
-        # dynamodb = boto3.resource('dynamodb')
-        # table = dynamodb.Table('transactions')
-        # item = {
-        #     'transaction_id': '12345',
-        #     'user_id': 10,
-        #     'amount': 100.0,
-        #     'date': '2020-01-01',
-        #     'category_id': '0',
-        #     'type': 'expense',
-        #     'description': 'Test transaction'
-        # }
-        # table.put_item(Item=item)
-        # print("Transaction added successfully!")
         try:
             new_transaction = Transaction(
                 user_id=int(request.form["user_id"]),
@@ -235,6 +226,21 @@ def record_transaction():
             return jsonify({'error': str(e)}), 400
     else:
         return render_template('record_transaction.html')
+        
+        # dynamodb = boto3.resource('dynamodb')
+        # table = dynamodb.Table('transactions')
+        # item = {
+        #     'transaction_id': '12345',
+        #     'user_id': 10,
+        #     'amount': 100.0,
+        #     'date': '2020-01-01',
+        #     'category_id': '0',
+        #     'type': 'expense',
+        #     'description': 'Test transaction'
+        # }
+        # table.put_item(Item=item)
+        # print("Transaction added successfully!")
+        # import uuid
 
 
 @app.route('/transactions/<transaction_id>', methods=['GET'])
@@ -242,6 +248,12 @@ def get_transaction(transaction_id):
     """
     Retrieve details of a specific transaction.
     """
+    transaction = session.get(Transaction, transaction_id)
+    if transaction:
+        return render_template('update_transaction.html', transaction=transaction), 201
+    else:
+        return jsonify({'error': 'Transaction not found'}), 404
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('transactions')
     # response = table.get_item(
@@ -250,11 +262,6 @@ def get_transaction(transaction_id):
     #     }
     # )
     # return response['Item']
-    transaction = session.query(Transaction).get(transaction_id)
-    if transaction:
-        return repr(transaction), 201
-    else:
-        return jsonify({'error': 'Transaction not found'}), 404
 
 
 @app.route('/transactions/<transaction_id>', methods=['PUT'])
@@ -262,6 +269,24 @@ def update_transaction(transaction_id):
     """
     Update a transaction.
     """
+    transaction = session.get(Transaction, transaction_id)
+    if transaction:
+        try:
+            data = request.get_json()
+            transaction.user_id = int(data.get('user_id'))
+            transaction.amount = data.get('amount')
+            transaction.date = data.get('date')
+            transaction.category_id = int(data.get('category_id'))
+            transaction.type = data.get('type')
+            transaction.description = data.get('description')
+
+            session.commit()
+            return jsonify({'message': 'Transaction updated successfully'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Transaction not found'}), 404
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('transactions')
     # table.update_item(
@@ -274,24 +299,6 @@ def update_transaction(transaction_id):
     #     }
     # )
     # print("Transaction updated successfully!")
-    transaction = session.query(Transaction).get(transaction_id)
-    if transaction:
-        try:
-            transaction.user_id = int(request.form['user_id'])
-            transaction.amount = float(request.form['amount'])
-            transaction.date = request.form['date']
-            # transaction.date = datetime.datetime.strptime(request.form['date'],
-            #                                               "%Y-%m-%d %H:%M:%S")
-            transaction.category_id = int(request.form['category_id'])
-            transaction.type = request.form['type']
-            transaction.description = request.form['description']
-
-            session.commit()
-            return jsonify({'message': 'Transaction updated successfully'}), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return jsonify({'error': 'Transaction not found'}), 404
 
 
 @app.route('/transactions/<transaction_id>', methods=['DELETE'])
@@ -299,16 +306,7 @@ def delete_transaction(transaction_id):
     """
     Delete a transaction.
     """
-    # dynamodb = boto3.resource('dynamodb')
-    # table = dynamodb.Table('transactions')
-    # table.delete_item(
-    #     Key={
-    #         'transaction_id': f'{transaction_id}'
-    #     }
-    # )
-    # print("Transaction deleted successfully!")
-
-    transaction = session.query(Transaction).get(transaction_id)
+    transaction = session.get(Transaction, transaction_id)
     if transaction:
         try:
             session.delete(transaction)
@@ -318,6 +316,15 @@ def delete_transaction(transaction_id):
             return jsonify({'error': str(e)}), 400
     else:
         return jsonify({'error': 'Transaction not found'}), 404
+    
+    # dynamodb = boto3.resource('dynamodb')
+    # table = dynamodb.Table('transactions')
+    # table.delete_item(
+    #     Key={
+    #         'transaction_id': f'{transaction_id}'
+    #     }
+    # )
+    # print("Transaction deleted successfully!")
 
 
 # Category Service
@@ -328,16 +335,6 @@ def create_category():
     """
     if request.method == 'GET':
         return render_template('create_category.html')
-    # dynamodb = boto3.resource('dynamodb')
-    # table = dynamodb.Table('categories')
-    # item = {
-    #     'category_id': '0',
-    #     'user_id': 10,
-    #     'name': 'Test category',
-    #     'description': 'Test category description'
-    # }
-    # table.put_item(Item=item)
-    # print("Category added successfully!")
 
     try:
         new_category = Category(
@@ -351,6 +348,17 @@ def create_category():
                         'category_id': new_category.category_id}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
+    
+    # dynamodb = boto3.resource('dynamodb')
+    # table = dynamodb.Table('categories')
+    # item = {
+    #     'category_id': '0',
+    #     'user_id': 10,
+    #     'name': 'Test category',
+    #     'description': 'Test category description'
+    # }
+    # table.put_item(Item=item)
+    # print("Category added successfully!")
 
 
 @app.route('/categories', methods=['GET'])
@@ -358,13 +366,13 @@ def get_categories():
     """
     Retrieve all categories.
     """
+    categories = session.query(Category).all()
+    return jsonify(categories), 201
+
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('categories')
     # response = table.scan()
     # return response['Items']
-
-    categories = session.query(Category).all()
-    return jsonify(categories), 201
 
 
 @app.route('/categories/<category_id>', methods=['PUT'])
@@ -372,7 +380,21 @@ def update_category(category_id):
     """
     Update a category.
     """
-    # TODO - improve this function to update any attribute of the category
+    category = session.get(Category, category_id)
+    if category:
+        try:
+            data = request.get_json()
+            category.user_id = int(request.form['user_id'])
+            category.name = data.get('name')
+            category.description = data.get('description')
+
+            session.commit()
+            return jsonify({'message': 'Category updated successfully'}), 201
+        except Exception as e:
+            return jsonify({'error': str(e)}), 400
+    else:
+        return jsonify({'error': 'Category not found'}), 404
+    
     # dynamodb = boto3.resource('dynamodb')
     # table = dynamodb.Table('categories')
     # table.update_item(
@@ -386,36 +408,13 @@ def update_category(category_id):
     # )
     # print("Category updated successfully!")
 
-    category = session.query(Category).get(category_id)
-    if category:
-        try:
-            category.user_id = int(request.form['user_id'])
-            category.name = request.form['name']
-            category.description = request.form['description']
-
-            session.commit()
-            return jsonify({'message': 'Category updated successfully'}), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return jsonify({'error': 'Category not found'}), 404
-
 
 @app.route('/categories/<category_id>', methods=['DELETE'])
 def delete_category(category_id):
     """
     Delete a category.
     """
-    # dynamodb = boto3.resource('dynamodb')
-    # table = dynamodb.Table('categories')
-    # table.delete_item(
-    #     Key={
-    #         'category_id': f'{category_id}'
-    #     }
-    # )
-    # print("Category deleted successfully!")
-
-    category = session.query(Category).get(category_id)
+    category = session.get(Category, category_id)
     if category:
         try:
             session.delete(category)
@@ -425,6 +424,15 @@ def delete_category(category_id):
             return jsonify({'error': str(e)}), 400
     else:
         return jsonify({'error': 'Category not found'}), 404
+    
+    # dynamodb = boto3.resource('dynamodb')
+    # table = dynamodb.Table('categories')
+    # table.delete_item(
+    #     Key={
+    #         'category_id': f'{category_id}'
+    #     }
+    # )
+    # print("Category deleted successfully!")
 
 
 # Report Generation Service
