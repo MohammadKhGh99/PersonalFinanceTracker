@@ -1,4 +1,4 @@
-import datetime
+import os
 import flask
 import boto3
 from flask import render_template, request, jsonify
@@ -7,7 +7,18 @@ from sqlalchemy import (Column, String, Integer, JSON, ForeignKey, DateTime,
                         create_engine, Float)
 
 app = flask.Flask(__name__)
-engine = create_engine('sqlite:///finance.db')
+
+# Define the connection parameters
+DB_HOST = "finance.c9kayga8eues.us-east-1.rds.amazonaws.com"  # Replace with your RDS endpoint
+DB_PORT = "3306"  # Default MariaDB port
+DB_NAME = "finance"  # Replace with your database name
+DB_USER = "mohammadgh"  # Replace with your RDS username
+# todo - check if you can use another way to store the password
+DB_PASSWORD = os.getenv("DB_PASSWORD")  # Replace with your RDS password
+
+# SQLAlchemy connection URL
+connection_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+engine = create_engine(connection_url)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -20,8 +31,8 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = 'users'
     user_id = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String)
-    name = Column(String)
+    email = Column(String(255))
+    name = Column(String(255))
     preferences = Column(JSON)
 
     def __repr__(self) -> str:
@@ -34,10 +45,10 @@ class Transaction(Base):
     transaction_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = mapped_column(ForeignKey("users.user_id"))
     amount = Column(Float)
-    date = Column(String)
+    date = Column(String(255))
     category_id = mapped_column(ForeignKey("categories.category_id"))
-    type = Column(String)
-    description = Column(String)
+    type = Column(String(255))
+    description = Column(String(255))
 
     def __repr__(self) -> str:
         return (
@@ -51,8 +62,8 @@ class Category(Base):
     __tablename__ = 'categories'
     category_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = mapped_column(ForeignKey("users.user_id"))
-    name = Column(String)
-    description = Column(String)
+    name = Column(String(255))
+    description = Column(String(255))
 
     def __repr__(self) -> str:
         return (
