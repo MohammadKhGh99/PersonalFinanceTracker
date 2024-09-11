@@ -8,14 +8,14 @@
   <h1 style="text-align: center; width: 100%">Update Transaction Details</h1>
   <main>
     <section style="display: flex; align-items: center; justify-content: center">
-      <form onsubmit="updateTransaction(event)">
+      <form onsubmit="updateTransaction(event, this)">
         <div>
           <label for="user_id">User ID</label>
           <input type="text" name="user_id" id="user_id" value="{{transaction.user_id}}" style="width: 400px;" required>
         </div><br>
         <div>
           <label for="amount">Amount</label>
-          <input type="email" name="amount" id="amount" value="{{transaction.amount}}" style="width: 400px;" required>
+          <input type="number" step="0.01" name="amount" id="amount" value="{{transaction.amount}}" style="width: 400px;" required>
         </div><br>
         <div>
           <label for="date">Date</label>
@@ -36,13 +36,14 @@
         <button type="submit">
             Update transaction
         </button>
+        <div id="responseMessage"></div>
         <script>
-        async function updateTransaction(event) {
+        async function updateTransaction(event, form) {
             event.preventDefault();
             let transactionArray = {};
             transactionArray['transaction_id'] = "{{transaction.transaction_id}}";
             let allDiv = form.querySelectorAll('div');
-            for (let i = 0; i < allDiv.length; i++) {
+            for (let i = 0; i < allDiv.length - 1; i++) {
               const curInput = allDiv[i].querySelector('input');  
               transactionArray[curInput.name] = curInput.value;
             }
@@ -54,6 +55,18 @@
                 },
                 body: JSON.stringify(transactionArray)
               });
+
+            // Parse the response JSON
+            const responseData = await response.json();
+            
+            const responseMessageDiv = document.getElementById('responseMessage');
+            
+            // Check if the request was successful
+            if (response.ok) {
+              responseMessageDiv.innerHTML = `<p style="color: green;">${responseData.message}</p>`;
+            } else {
+              responseMessageDiv.innerHTML = `<p style="color: red;">${responseData.error}</p>`;
+            }
         }
         </script>
       </form>

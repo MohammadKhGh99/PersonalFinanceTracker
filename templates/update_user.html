@@ -27,13 +27,16 @@
         <button type="submit">
             Update user profile
         </button>
+        <div id="responseMessage"></div>
         <script>
         async function updateUserProfile(event, form) {
             event.preventDefault();
+
             let userArray = {};
             userArray['user_id'] = "{{user.user_id}}";
+
             let allDiv = form.querySelectorAll('div');
-            for (let i = 0; i < allDiv.length; i++) {
+            for (let i = 0; i < allDiv.length - 1; i++) {
                 const curInput = allDiv[i].querySelector('input');
                 userArray[curInput.name] = curInput.value;
             }
@@ -45,6 +48,18 @@
                 },
                 body: JSON.stringify(userArray)
             });
+
+            // Parse the response JSON
+            const responseData = await response.json();
+            
+            const responseMessageDiv = document.getElementById('responseMessage');
+            
+            // Check if the request was successful
+            if (response.ok) {
+              responseMessageDiv.innerHTML = `<p style="color: green;">${responseData.message}</p>`;
+            } else {
+              responseMessageDiv.innerHTML = `<p style="color: red;">${responseData.error}</p>`;
+            }
         }
         </script>
       </form>
