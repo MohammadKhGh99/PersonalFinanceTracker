@@ -4,6 +4,8 @@
 
 This project involves building a Python application that helps users track their personal finances. The application will allow users to record income and expenses, categorize transactions, and generate financial reports.
 
+![alt text](image.png)
+
 ## Table of Contents
 
 - [Features](#features)

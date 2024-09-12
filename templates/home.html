@@ -50,13 +50,13 @@
     </h4>
     <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
       <div>
-        <input type="number" placeholder="User ID" name="user_id" id="user_id" style="width: 150px" required>
+        <input type="text" placeholder="User ID" name="user_id" id="user_id" style="width: 150px" required>
         <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/users/' + document.getElementById('user_id').value}">
           Get user profile details
         </button>
       </div><br>
       <div>
-        <input type="number" placeholder="User ID" name="user_id" id="user_id_update" style="width: 150px" required>
+        <input type="text" placeholder="User ID" name="user_id" id="user_id_update" style="width: 150px" required>
         <button onclick="goToUpdateUser(this)">
           Update user profile
         </button>
@@ -71,7 +71,7 @@
         </script>
       </div><br>
       <form onsubmit="deleteUserProfile(event, this)">
-        <input type="number" placeholder="User ID" name="user_id" id="user_id_delete" style="width: 150px" required>
+        <input type="text" placeholder="User ID" name="user_id" id="user_id_delete" style="width: 150px" required>
         <button>
           Delete a user account
         </button>
@@ -109,13 +109,13 @@
         }
       </script>
       <div>
-        <input type="number" name="transaction_id" id="transaction_id" placeholder="Transaction ID" style="width: 150px" required>
+        <input type="text" name="transaction_id" id="transaction_id" placeholder="Transaction ID" style="width: 150px" required>
         <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/transactions/' + this.parentNode.children[0].value;}">
           Get transaction
         </button>
       </div><br>
       <div>
-        <input type="number" name="transaction_id" id="transaction_id_update" placeholder="Transaction ID" style="width: 150px" required>
+        <input type="text" name="transaction_id" id="transaction_id_update" placeholder="Transaction ID" style="width: 150px" required>
         <button onclick="goToUpdateTransaction(this)">
           Update a transaction
         </button>
@@ -130,7 +130,7 @@
         </script>
       </div><br>
       <form onsubmit="deleteTransaction(event, this)">
-        <input type="number" placeholder="Transaction ID" name="transaction_id" id="transaction_id_delete" style="width: 150px" required>
+        <input type="text" placeholder="Transaction ID" name="transaction_id" id="transaction_id_delete" style="width: 150px" required>
         <button>
           Delete a transaction account
         </button>
@@ -158,15 +158,15 @@
       Category Service
     </h4>
     <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
-      <script>
-        function goToCreateCategory() {
-          const createStr = "{{url_for('create_category')}}";
-          window.location.href = createStr;
-        }
-      </script>
       <button onclick="goToCreateCategory()">
         Create a new category
       </button><br>
+      <script>
+        function goToCreateCategory() {
+          const createStr = "{{url_for('create_category', create=True)}}";
+          window.location.href = createStr;
+        }
+      </script>
       <button onclick="goToGetCategory()">
         Retrieve all categories
       </button><br>
@@ -177,7 +177,7 @@
         }
       </script>
       <div>
-        <input type="number" name="category_id" id="category_id_update" placeholder="Category ID" style="width: 150px" required>
+        <input type="text" name="category_id" id="category_id_update" placeholder="Category ID" style="width: 150px" required>
         <button onclick="goToUpdateCategory(this)">
           Update a category
         </button>
@@ -192,7 +192,7 @@
         </script>
       </div><br>
       <form onsubmit="deleteCategoryProfile(event, this)">
-        <input type="number" placeholder="Category ID" name="category_id" id="category_id_delete" style="width: 150px" required>
+        <input type="text" placeholder="Category ID" name="category_id" id="category_id_delete" style="width: 150px" required>
         <button>
           Delete a category
         </button>
@@ -213,7 +213,35 @@
         </script>
       </form>
     </section>
+    <hr>
+    <!-- Report Generation Service -->
+    <h4>
+      Report Generation Service
+    </h4>
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
+      <form method="post" action="reports">
+        <label for="start_date">Start Date</label>
+        <input type="date" name="start_date" id="start_date" required>
+        <br><br>
+        <label for="end_date">End Date</label>
+        <input type="date" name="end_date" id="end_date" required>
+        <br><br>
+        <label for="user_id">User ID</label>
+        <input type="text" name="user_id" id="user_id" style="width: 200px" required>
+        <br><br>
+        <label for="report_format">Report Format</label>
+        <select name="report_format" id="report_format">
+          <option value="pdf" selected>PDF</option>
+          <option value="csv">CSV</option>
+          <option value="excel">Excel</option>
+        </select><br><br>
+        <button type="submit">
+          Generate a report
+        </button>
+      </form>
+    </section>
     <hr><br>
+
   </main>
 </body>
 </html>

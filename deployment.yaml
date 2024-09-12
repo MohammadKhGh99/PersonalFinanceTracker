@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: finance  # Name of the container
-        image: mohammadgh99/finance_tracker:0.0.1  # Docker image to use for the container
+        image: mohammadgh99/finance_tracker:0.0.2  # Docker image to use for the container
         
 ---
 apiVersion: v1  # Version of the Kubernetes API
@@ -24,6 +24,7 @@ kind: Service  # Specifies that this is a Service object
 metadata:
   name: finance-service  # Name of the Service
 spec:
+  type: 
   selector:
     app: finance  # Target Pods with the label app: nginx
   ports:
