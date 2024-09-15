@@ -1,4 +1,4 @@
-# Polybot Service: Docker Project
+# Personal Finance Tracker
 
 ## Description
 
