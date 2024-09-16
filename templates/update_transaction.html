@@ -19,7 +19,7 @@
         </div><br>
         <div>
           <label for="date">Date</label>
-          <input type="date" name="date" id="date" value="{{transaction.date}}" required>
+          <input type="date" name="date" id="date" value="{{transaction.trans_date}}" required>
         </div><br>
         <div>
           <label for="category_id">Category ID</label>
@@ -27,8 +27,18 @@
         </div><br>
         <div>
           <label for="type">Type</label>
-          <input type="text" name="type" id="type" value="{{transaction.type}}" required>
+          <select name="type" id="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <script>
+            document.currentScript.previousElementSibling.value = "{{transaction.trans_type}}";
+          </script>
         </div><br>
+        <!-- <div>
+          <label for="type">Type</label>
+          <input type="text" name="type" id="type" value="{{transaction.trans_type}}" required>
+        </div><br> -->
         <div>
           <label for="description">Description</label>
           <input type="text" name="description" id="description" value="{{transaction.description}}" required>
@@ -44,7 +54,12 @@
             transactionArray['transaction_id'] = "{{transaction.transaction_id}}";
             let allDiv = form.querySelectorAll('div');
             for (let i = 0; i < allDiv.length - 1; i++) {
-              const curInput = allDiv[i].querySelector('input');  
+              const curInput = allDiv[i].querySelector('input');
+              if (curInput === null) {
+                const curSelect = allDiv[i].querySelector('select');
+                transactionArray[curSelect.name] = curSelect.value;
+                continue;
+              }
               transactionArray[curInput.name] = curInput.value;
             }
             // Perform the PUT request
