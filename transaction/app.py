@@ -1,5 +1,6 @@
 import json
 from queue import Queue
+from time import sleep
 import flask
 from flask import render_template, request, jsonify
 import uuid
@@ -58,6 +59,7 @@ def handle_transaction():
                                 }
                             )
                             print('transaction sent to display it to user')
+                            sleep(10)
                         else:
                             print('Transaction not found')
                     except Exception as e:

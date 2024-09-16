@@ -240,6 +240,7 @@ def get_transaction(transaction_id):
     Retrieve details of a specific transaction.
     """
     try:
+        print('Send message to get transaction')
         sqs_client.send_message(
             QueueUrl=transaction_queue_url,
             MessageBody=json.dumps({'transaction_id': str(transaction_id)}),
@@ -250,6 +251,7 @@ def get_transaction(transaction_id):
                 }
             }
         )
+        print('Message sent to get transaction')
         
         while True:
             # Poll the SQS queue for the response message
@@ -259,13 +261,13 @@ def get_transaction(transaction_id):
                 WaitTimeSeconds=10,
                 MessageAttributeNames=['All']
             )
-            print('receive transaction details')
 
             # Check if messages are received
             if 'Messages' in response:
                 message = response['Messages'][0]
                 handle_type = message['MessageAttributes']['method_sender']['StringValue']
                 if handle_type == 'transaction/get_transaction':
+                    print('receive transaction details')
                     transaction = json.loads(message['Body'])
 
                     # Delete the message from the queue after processing
