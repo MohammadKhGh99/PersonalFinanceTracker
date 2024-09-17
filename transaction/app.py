@@ -37,6 +37,7 @@ def handle_transaction():
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
                     except Exception as e:
                         print('ERROR while recording transaction: ' + str(e))
+                        raise e
                 elif handle_type == 'get_transaction':
                     print('Getting transaction')
                     try:
@@ -59,11 +60,12 @@ def handle_transaction():
                                 }
                             )
                             print('transaction sent to display it to user')
-                            sleep(10)
+                            # sleep(10)
                         else:
                             print('Transaction not found')
                     except Exception as e:
                         print('ERROR while get transaction: ' + str(e))
+                        raise e
                 elif handle_type == 'update_transaction':
                     print('Updating transaction')
                     try:
@@ -89,6 +91,7 @@ def handle_transaction():
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
                     except Exception as e:
                         print('ERROR while update transaction: ' + str(e))
+                        raise e
 
                 elif handle_type == 'delete_transaction':
                     print('Deleting transaction')
@@ -103,70 +106,9 @@ def handle_transaction():
                         sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
                     except Exception as e:
                         print('ERROR while delete transaction: ' + str(e))
+                        raise e
         print('...')
 
-
-def get_transaction(transaction_id):
-    """
-    Retrieve details of a specific transaction.
-    """
-    try:
-        response = transactions_table.get_item(
-            Key={
-                'transaction_id': str(transaction_id)
-            }
-        )
-        if 'Item' in response:
-            transaction = response['Item']
-            return render_template('update_transaction.html', transaction=transaction), 201
-        else:
-            return jsonify({'error': 'Transaction not found'}), 404
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-def update_transaction(transaction_id):
-    """
-    Update a transaction.
-    """
-    data = request.get_json()
-    user_id = data.get('user_id')
-    amount = data.get('amount')
-    trans_date = data.get('date')
-    category_id = data.get('category_id')
-    trans_type = data.get('type')
-    description = data.get('description')
-
-    try:
-        transactions_table.update_item(
-            Key={
-                'transaction_id': str(transaction_id)
-            },
-            UpdateExpression='SET user_id = :ui, amount = :a, trans_date = :d, category_id = :ci, trans_type = :t, description = :desc',
-            ExpressionAttributeValues={
-                ':ui': user_id, ':a': amount, ':d': trans_date, ':ci': category_id, ':t': trans_type, ':desc': description
-            },
-            ReturnValues='UPDATED_NEW'
-        )
-        return jsonify({'message': 'Transaction updated successfully'}), 201
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-
-
-def delete_transaction(transaction_id):
-    """
-    Delete a transaction.
-    """
-    try:
-        transactions_table.delete_item(
-            Key={
-                'transaction_id': str(transaction_id)
-            }
-        )
-        return jsonify({'message': 'Transaction deleted successfully'})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
-    
 
 if __name__ == '__main__':
     handle_transaction()

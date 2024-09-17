@@ -6,7 +6,7 @@ import boto3
 import sys
 import uuid
 from boto3.dynamodb.conditions import Key, Attr
-from flask import render_template, request, jsonify
+from flask import redirect, render_template, request, jsonify, url_for
 # from pymysql import connect
 from sqlalchemy.orm import DeclarativeBase, mapped_column, sessionmaker
 from sqlalchemy import (Column, String, Integer, JSON, ForeignKey, DateTime,
@@ -98,6 +98,11 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/users', methods=['GET'])
+def users_management():
+    return render_template('users_management.html')
+
+
 # User Management Service
 @app.route('/users/register', methods=['GET', 'POST'])
 def register_user():
@@ -110,11 +115,12 @@ def register_user():
         primary_key = str(uuid.uuid4())
         new_user = {
             'user_id': primary_key,
-            'email': request.form["email"],
-            'name': request.form["name"],
-            'preferences': request.form["preferences"]
+            'email': request.form["register-email"],
+            'user_name': request.form["register-name"],
+            'preferences': request.form["register-preferences"]
         }
         users_table.put_item(Item=new_user)
+        return render_template('users_management.html', alert_message='User created successfully')
         return jsonify({'message': 'User created successfully',
                         'user_id': primary_key}), 201
     except Exception as e:
@@ -134,7 +140,7 @@ def get_user(user_id):
         )
         if 'Item' in response:
             user = response['Item']
-            return render_template('update_user.html', user=user), 201
+            return render_template('users_management.html', user=user), 201
         else:
             return jsonify({'error': 'User not found'}), 404
     except Exception as e:
@@ -147,18 +153,18 @@ def update_user(user_id):
     Update user profile.
     """
     data = request.get_json()
-    email = data.get('email')
-    name = data.get('name')
-    preferences = data.get('preferences')
+    email = data.get('update-email')
+    user_name = data.get('update-name')
+    preferences = data.get('update-preferences')
 
     try:
         users_table.update_item(
             Key={
                 'user_id': str(user_id)
             },
-            UpdateExpression='SET email = :e, name = :n, preferences = :p',
+            UpdateExpression='SET email = :e, user_name = :n, preferences = :p',
             ExpressionAttributeValues={
-                ':e': email, ':n': name, ':p': preferences
+                ':e': email, ':n': user_name, ':p': preferences
             },
             ReturnValues='UPDATED_NEW'
         )
@@ -196,42 +202,44 @@ def login_user():
         return "Please login to access the application."
 
 
+@app.route('/transactions', methods=['GET'])
+def transactions_management():
+    return render_template('transactions_service.html')
+
+
 # Transaction Service
-@app.route('/transactions', methods=['GET', 'POST'])
+@app.route('/transactions', methods=['POST'])
 def record_transaction():
     """
      Record a new transaction.
     """
-    if request.method == 'POST':
-        try:
-            print("Sending message from main to transaction to transaction SQS")
-            primary_key = str(uuid.uuid4())
-            new_transaction = {
-                'transaction_id': primary_key,
-                'user_id': str(request.form["user_id"]),
-                'amount': request.form["amount"],
-                'trans_date': request.form["date"],
-                'category_id': str(request.form["category_id"]),
-                'trans_type': request.form["type"],
-                'description': request.form["description"]
-            }
-            sqs_client.send_message(
-                QueueUrl=transaction_queue_url,
-                MessageBody=json.dumps(new_transaction),
-                MessageAttributes={
-                    'method_sender': {
-                        'StringValue': 'record_transaction',
-                        'DataType': 'String'
-                    }
+    try:
+        print("Sending message from main to transaction to transaction SQS")
+        primary_key = str(uuid.uuid4())
+        new_transaction = {
+            'transaction_id': primary_key,
+            'user_id': str(request.form["user_id"]),
+            'amount': request.form["amount"],
+            'trans_date': request.form["date"],
+            'category_id': str(request.form["category_id"]),
+            'trans_type': request.form["type"],
+            'description': request.form["description"]
+        }
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(new_transaction),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'record_transaction',
+                    'DataType': 'String'
                 }
-            )
-            print("Message sent to transaction SQS")
-            return jsonify({'message': 'Transaction created successfully',
-                            'transaction_id': primary_key}), 201
-        except Exception as e:
-            return jsonify({'error': str(e)}), 400
-    else:
-        return render_template('record_transaction.html')
+            }
+        )
+        print("Message sent to transaction SQS")
+        return jsonify({'message': 'Transaction created successfully',
+                        'transaction_id': primary_key}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
 
 @app.route('/transactions/<transaction_id>', methods=['GET'])
@@ -277,7 +285,7 @@ def get_transaction(transaction_id):
                     )
                     # Check if the transaction is found
                     if transaction:
-                        return render_template('update_transaction.html', transaction=transaction), 201
+                        return render_template('transactions_service.html', transaction=transaction), 201
                     else:
                         return jsonify({'error': 'Transaction not found'}), 404        
             else:
@@ -305,7 +313,7 @@ def update_transaction(transaction_id):
                 }
             }
         )
-        return jsonify({'message': 'Transaction updated successfully'}), 201
+        return jsonify({'message': f'Transaction [{transaction_id}] updated successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -326,10 +334,14 @@ def delete_transaction(transaction_id):
                 }
             }
         )
-        return jsonify({'message': 'Transaction deleted successfully'})
+        return jsonify({'message': f'Transaction [{transaction_id}] deleted successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
+
+@app.route('/category', methods=['GET'])
+def category_management():
+    return render_template('category_service.html')
 
 
 # Category Service
@@ -339,6 +351,7 @@ def create_category():
     Create a new category.
     """
     try:
+        print("Sending message from main to category to category SQS")
         primary_key = str(uuid.uuid4())
         new_category = {
             'category_id': primary_key,
@@ -346,8 +359,19 @@ def create_category():
             'name': request.form["name"],
             'description': request.form["description"]
         }
-        categories_table.put_item(Item=new_category)
-        return jsonify({'message': 'Category created successfully', 'category_id': primary_key}), 201
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(new_category),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'create_category',
+                    'DataType': 'String'
+                }
+            }
+        )
+        print("Message sent to category SQS")        
+        return jsonify({'message': 'Category created successfully', 
+                        'category_id': primary_key}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
@@ -360,35 +384,75 @@ def get_categories():
     if request.args.get('create'):
         return render_template('create_category.html')
     try:
-        response = categories_table.scan()
-        categories = response['Items']
-        return jsonify({ i + 1: repr(categories[i]) for i in range(len(categories))}), 201
+        print('Send message to get categories')
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps({'category_id': 'all'}),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'get_categories',
+                    'DataType': 'String'
+                }
+            }
+        )
+        print('Message sent to get categories')
+
+        while True:
+            # Poll the SQS queue for the response message
+            response = sqs_client.receive_message(
+                QueueUrl=transaction_queue_url,
+                MaxNumberOfMessages=1,
+                WaitTimeSeconds=10,
+                MessageAttributeNames=['All']
+            )
+
+            # Check if messages are received
+            if 'Messages' in response:
+                message = response['Messages'][0]
+                handle_type = message['MessageAttributes']['method_sender']['StringValue']
+                if handle_type == 'category/get_categories':
+                    print('receive categories details')
+                    categories = json.loads(message['Body'])
+
+                    # Delete the message from the queue after processing
+                    sqs_client.delete_message(
+                        QueueUrl=transaction_queue_url,
+                        ReceiptHandle=message['ReceiptHandle']
+                    )
+                    # Check if the categories are found
+                    if categories:
+                        return jsonify(categories), 201
+                    else:
+                        return jsonify({'error': 'Categories not found'}), 404
+            else:
+                print('No messages in queue, retrying...')
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
 
-@app.route('/categories/<category_id>', methods=['PUT'])
+@app.route('/categories/<category_id>', methods=['GET', 'PUT'])
 def update_category(category_id):
     """
     Update a category.
     """
+    if request.method == 'GET':
+        return render_template('update_category.html')
     data = request.get_json()
-    user_id = data.get('user_id')
-    name = data.get('name')
-    description = data.get('description')
+    data['category_id'] = str(category_id)
 
     try:
-        categories_table.update_item(
-            Key={
-                'category_id': str(category_id)
-            },
-            UpdateExpression='SET user_id = :ui, name = :n, description = :d',
-            ExpressionAttributeValues={
-                ':ui': user_id, ':n': name, ':d': description
-            },
-            ReturnVlues='UPDATED_NEW'
+        # send message to category service to update the category
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(data),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'update_category',
+                    'DataType': 'String'
+                }
+            }
         )
-        return jsonify({'message': 'Category updated successfully'}), 201
+        return jsonify({'message': f'Category [{category_id}] updated successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 
@@ -399,12 +463,17 @@ def delete_category(category_id):
     Delete a category.
     """
     try:
-        categories_table.delete_item(
-            Key={
-                'category_id': str(category_id)
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps({'transaction_id': str(category_id)}),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'delete_category',
+                    'DataType': 'String'
+                }
             }
         )
-        return jsonify({'message': 'Category deleted successfully'})
+        return jsonify({'message': f'Category [{category_id}] deleted successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
 

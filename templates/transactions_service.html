@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+  button {
+    cursor: pointer;
+  }
+  hr {
+    margin: 0;
+    width: 100%; 
+    border: 2px dashed black;
+  }
+</style>
+<body style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+  <main style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 80vw">
+    <button onclick="window.location.href='/'">
+      Return to Home
+    </button><br><br>
+    <h4>
+      Transaction Service
+    </h4>
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
+      <form action="{{url_for('record_transaction')}}" method="post" style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+        <div>
+          <label for="user_id">User ID</label>
+          <input type="text" name="user_id" id="user_id" required>
+        </div>
+        <br>
+        <div>
+          <label for="amount">Amount</label>
+          <input type="number" step="0.01" name="amount" id="amount" required>
+        </div>
+        <br>
+        <div>
+          <label for="type">Type</label>
+          <select name="type" id="type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <br>
+        <div>
+          <label for="category_id">Category</label>
+          <input type="text" name="category_id" id="category_id">
+        </div>
+        <br>
+        <div>
+          <label for="description">Description</label>
+          <input type="text" name="description" id="description" required>
+        </div>
+        <br>
+        <div>
+          <label for="date">Date</label>
+          <input type="date" name="date" id="date" required>
+        </div>
+        <br>
+        <button type="submit">
+          Record a new Transaction
+        </button><br>
+      </form>
+      <hr><br>
+      <div>
+        <input type="text" name="transaction_id" id="transaction_id" placeholder="Transaction ID" style="width: 150px" required>
+        <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/transactions/' + this.parentNode.children[0].value;}">
+          Get transaction
+        </button>
+      </div><br>
+      <section>
+        {% if transaction %}
+          <form onsubmit="updateTransaction(event, this)" style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+            <div>
+              <label for="user_id">User ID</label>
+              <input type="text" name="user_id" id="user_id" value="{{transaction.user_id}}" style="width: 400px;" required>
+            </div><br>
+            <div>
+              <label for="amount">Amount</label>
+              <input type="number" step="0.01" name="amount" id="amount" value="{{transaction.amount}}" style="width: 400px;" required>
+            </div><br>
+            <div>
+              <label for="date">Date</label>
+              <input type="date" name="date" id="date" value="{{transaction.trans_date}}" required>
+            </div><br>
+            <div>
+              <label for="category_id">Category ID</label>
+              <input type="text" name="category_id" id="category_id" value="{{transaction.category_id}}" required>
+            </div><br>
+            <div>
+              <label for="type">Type</label>
+              <select name="type" id="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+              <script>
+                document.currentScript.previousElementSibling.value = "{{transaction.trans_type}}";
+              </script>
+            </div><br>
+            <!-- <div>
+              <label for="type">Type</label>
+              <input type="text" name="type" id="type" value="{{transaction.trans_type}}" required>
+            </div><br> -->
+            <div>
+              <label for="description">Description</label>
+              <input type="text" name="description" id="description" value="{{transaction.description}}" required>
+            </div><br>
+            <button type="submit">
+                Update transaction
+            </button><br>
+            <div id="responseMessage"></div>
+            <script>
+            async function updateTransaction(event, form) {
+                event.preventDefault();
+                let transactionArray = {};
+                transactionArray['transaction_id'] = "{{transaction.transaction_id}}";
+                let allDiv = form.querySelectorAll('div');
+                for (let i = 0; i < allDiv.length - 1; i++) {
+                  const curInput = allDiv[i].querySelector('input');
+                  if (curInput === null) {
+                    const curSelect = allDiv[i].querySelector('select');
+                    transactionArray[curSelect.name] = curSelect.value;
+                    continue;
+                  }
+                  transactionArray[curInput.name] = curInput.value;
+                }
+                // Perform the PUT request
+                const response = await fetch("/transactions/{{transaction.transaction_id}}", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(transactionArray)
+                  });
+    
+                // Parse the response JSON
+                const responseData = await response.json();
+                
+                const responseMessageDiv = document.getElementById('responseMessage');
+                
+                // Check if the request was successful
+                if (response.ok) {
+                  responseMessageDiv.innerHTML = `<p style="color: green;">${responseData.message}</p>`;
+                } else {
+                  responseMessageDiv.innerHTML = `<p style="color: red;">${responseData.error}</p>`;
+                }
+            }
+            </script>
+          </form>
+        {% endif %}
+      </section>
+      <hr><br>
+      <div>
+        <input type="text" name="transaction_id" id="transaction_id_update" placeholder="Transaction ID" style="width: 150px" required>
+        <button onclick="goToUpdateTransaction(this)">
+          Update a transaction
+        </button>
+        <script>
+          function goToUpdateTransaction(button){
+            const transactionId = button.parentElement.children[0].value;
+            if (transactionId){
+              const updateStr = `/transactions/${transactionId}`;
+              window.location.href = updateStr;
+            }
+          }
+        </script>
+      </div><br>
+      <hr><br>
+      <form onsubmit="deleteTransaction(event, this)">
+        <input type="text" placeholder="Transaction ID" name="transaction_id" id="transaction_id_delete" style="width: 150px" required>
+        <button>
+          Delete a transaction
+        </button>
+        <script>
+          async function deleteTransaction(event, form) {
+              const confirmDelete = confirm("Are you sure you want to delete this transaction?");
+              if (!confirmDelete) {
+                  event.preventDefault();
+                  return;
+              }
+              event.preventDefault();
+              const transactionId = form.children[0].value;
+              // Perform the DELETE request
+              const response = await fetch(`/transactions/${transactionId}`, {
+                  method: 'DELETE'
+              });
+              if (response.ok) {
+                  alert("Transaction deleted successfully.");
+                  window.location.reload();
+              } else {
+                  alert("Failed to delete the transaction.");
+              }
+          }
+        </script>
+      </form>
+    </section>
+  </main><br><br>
+</body>
+</html>

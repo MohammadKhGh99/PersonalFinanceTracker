@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+  button {
+    cursor: pointer;
+  }
+  hr {
+    margin: 0;
+    width: 100%; 
+    border: 2px dashed black;
+  }
+</style>
+<body style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+  <main style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 80vw">
+    <button onclick="window.location.href='/'">
+      Return to Home
+    </button>
+    <br><br>
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <th>Login</th>
+        <th>Register</th>
+      </tr>
+      <tr>
+        <td>
+          <br>
+          <form style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+            <div>
+              <label for="login-email">Email</label>&ensp;&ensp;&ensp;&ensp;
+              <input type="email" name="login-email" id="login-email" required>
+            </div><br>
+            <div>
+              <label for="login-password">Password</label>&ensp;
+              <input type="password" name="login-password" id="login-password" required>
+            </div><br><br>
+            <button disabled onclick="goToLogin()">
+              Login
+            </button>
+          </form>
+        </td>
+        <td style="border-left: 3px dashed black; padding: 10px">
+          <form action="{{url_for('register_user')}}" method="post" style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+            <div>
+              <label for="register-name">Name</label>&ensp;&ensp;&ensp;&ensp;&ensp;
+              <input type="text" name="register-name" id="register-name" required>
+            </div>
+            <br>
+            <div>
+              <label for="register-email">Email</label>&ensp;&ensp;&ensp;&ensp;&ensp;
+              <input type="email" name="register-email" id="register-email" required>
+            </div>
+            <br>
+    <!--        <div>-->
+    <!--          <label for="register-password">Password</label>-->
+    <!--          <input type="password" name="register-password" id="register-password" required>-->
+    <!--        </div>-->
+    <!--        <br>-->
+            <div>
+              <label for="register-preferences">Preferences</label>&ensp;
+              <input type="text" name="register-preferences" id="register-preferences" required>
+            </div>
+            <br>
+            <button type="submit">
+              Register
+            </button>
+          </form>
+        </td>
+      </tr>
+    </table>
+    <hr>
+    <!-- todo: show these just when the user is logged in -->
+    <!-- User Management Service -->
+    <h4>
+      User Management Service
+    </h4>
+    <section style="display: flex; align-items: center; justify-content: center; flex-direction: column">
+      <div>
+        <input type="text" placeholder="User ID" name="user_id" id="user_id" style="width: 150px" required>
+        <button onclick="if (this.parentNode.children[0].value) {window.location.href = '/users/' + document.getElementById('user_id').value}">
+          Get user profile details
+        </button>
+      </div>
+      <section>
+        {% if user %}
+          <br>
+          <form onsubmit="updateUserProfile(event, this)" style="display: flex; justify-content: center; align-items: center; flex-direction: column">
+          <div>
+            <label for="update-name">Name</label>
+            <input type="text" name="update-name" id="update-name" value="{{user.user_name}}" style="width: 400px;" required>
+          </div>
+          <br>
+          <div>
+            <label for="update-email">Email</label>
+            <input type="email" name="update-email" id="update-email" value="{{user.email}}" style="width: 400px;" required>
+          </div>
+          <br>
+          <div>
+            <label for="update-preferences">Preferences</label>
+            <input type="text" name="update-preferences" id="update-preferences" value="{{user.preferences}}" required>
+          </div>
+          <br>
+          <button type="submit">
+              Update user profile
+          </button>
+          <div id="responseMessage"></div>
+          <script>
+          async function updateUserProfile(event, form) {
+              event.preventDefault();
+
+              let userArray = {};
+              userArray['user_id'] = "{{user.user_id}}";
+
+              let allDiv = form.querySelectorAll('div');
+              for (let i = 0; i < allDiv.length - 1; i++) {
+                  const curInput = allDiv[i].querySelector('input');
+                  userArray[curInput.name] = curInput.value;
+              }
+              // Perform the PUT request
+              const response = await fetch("/users/{{user.user_id}}", {
+                  method: 'PUT',
+                  headers: {
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(userArray)
+              });
+
+              // Parse the response JSON
+              const responseData = await response.json();
+              
+              const responseMessageDiv = document.getElementById('responseMessage');
+              
+              // Check if the request was successful
+              if (response.ok) {
+                responseMessageDiv.innerHTML = `<p style="color: green;">${responseData.message}</p>`;
+              } else {
+                responseMessageDiv.innerHTML = `<p style="color: red;">${responseData.error}</p>`;
+              }
+          }
+          </script>
+        {% endif %}
+      </form>
+      <br>
+      <div style="display: flex; justify-content: center; align-items: center">
+        <input type="text" placeholder="User ID" name="user_id" id="user_id_update" style="width: 150px" required>&ensp;&ensp;&ensp;
+        <button onclick="goToUpdateUser(this)">
+          Update user profile
+        </button>
+        <script>
+          function goToUpdateUser(button){
+            const userId = button.parentNode.children[0].value;
+            if (userId){
+              const updateStr = `/users/${userId}`;
+              window.location.href = updateStr;
+            }
+          }
+        </script>
+      </div><br>
+      <form onsubmit="deleteUserProfile(event, this)" style="display: flex; justify-content: center; align-items: center">
+        <input type="text" placeholder="User ID" name="user_id" id="user_id_delete" style="width: 150px" required>&ensp;
+        <button>
+          Delete a user account
+        </button>
+        <script>
+          async function deleteUserProfile(event, form) {
+              const confirmDelete = confirm("Are you sure you want to delete this user account?");
+              if (!confirmDelete) {
+                  event.preventDefault();
+                  return;
+              }
+              event.preventDefault();
+              const userId = form.children[0].value;
+              // Perform the DELETE request
+              const response = await fetch(`/users/${userId}`, {
+                  method: 'DELETE'
+              });
+          }
+        </script>
+      </form>
+    </section>
+  </main><br>
+</body>
+</html>
