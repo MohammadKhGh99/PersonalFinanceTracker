@@ -1,4 +1,5 @@
 import json
+import os
 import flask
 import boto3
 import uuid
@@ -7,78 +8,8 @@ from flask import render_template, request, jsonify
 
 app = flask.Flask(__name__)
 
-# Define the connection parameters
-# DB_HOST = "finance.c9kayga8eues.us-east-1.rds.amazonaws.com"  # Replace with your RDS endpoint
-# DB_PORT = "3306"  # Default MariaDB port
-# DB_NAME = "finance"  # Replace with your database name
-# DB_USER = "mohammadgh"  # Replace with your RDS username
-# # todo - check if you can use another way to store the password
-# DB_PASSWORD = os.getenv("DB_PASSWORD")  # Replace with your RDS password
-
-# # SQLAlchemy connection URL
-# connection_url = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-# connection_url = 'sqlite:///finance.db'
-# engine = create_engine(connection_url)
-# Session = sessionmaker(bind=engine)
-# session = Session()
-
-dynamodb = boto3.resource('dynamodb')
-users_table = dynamodb.Table('users') # type: ignore
-# transactions_table = dynamodb.Table('transactions') # type: ignore
-categories_table = dynamodb.Table('categories') # type: ignore
 sqs_client = boto3.client('sqs', region_name='us-east-1')
-transaction_queue_url = 'https://sqs.us-east-1.amazonaws.com/593793064844/transaction-events'
-
-
-# class Base(DeclarativeBase):
-#     pass
-
-
-# # user table
-# class User(Base):
-#     __tablename__ = 'users'
-#     user_id = Column(Integer, primary_key=True, autoincrement=True)
-#     email = Column(String(255))
-#     name = Column(String(255))
-#     preferences = Column(JSON)
-
-#     def __repr__(self) -> str:
-#         return (f"User(user_id={self.user_id!r}, email={self.email!r}, "
-#                 f"name={self.name!r}, preferences={self.preferences!r})")
-
-
-# class Transaction(Base):
-#     __tablename__ = 'transactions'
-#     transaction_id = Column(Integer, primary_key=True, autoincrement=True)
-#     user_id = mapped_column(ForeignKey("users.user_id"))
-#     amount = Column(Float)
-#     date = Column(String(255))
-#     category_id = mapped_column(ForeignKey("categories.category_id"))
-#     type = Column(String(255))
-#     description = Column(String(255))
-
-#     def __repr__(self) -> str:
-#         return (
-#             f"Transaction(transaction_id={self.transaction_id!r}, "
-#             f"user_id={self.user_id!r}, amount={self.amount!r}, "
-#             f"date={self.date!r}, category_id={self.category_id!r}, "
-#             f"type={self.type!r}, description={self.description!r})")
-
-
-# class Category(Base):
-#     __tablename__ = 'categories'
-#     category_id = Column(Integer, primary_key=True, autoincrement=True)
-#     user_id = mapped_column(ForeignKey("users.user_id"))
-#     name = Column(String(255))
-#     description = Column(String(255))
-
-#     def __repr__(self) -> str:
-#         return (
-#             f"Category(category_id={self.category_id!r}, user_id={self.user_id!r}, "
-#             f"name={self.name!r}, description={self.description!r})")
-
-# Base.metadata.create_all(engine)
+transaction_queue_url = os.environ['SQS_QUEUE_NAME']
 
 
 @app.route('/', methods=['GET'])
