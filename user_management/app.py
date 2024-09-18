@@ -1,9 +1,4 @@
 import json
-from queue import Queue
-from time import sleep
-import flask
-from flask import render_template, request, jsonify
-import uuid
 import boto3
 import os
 
@@ -86,7 +81,7 @@ def handle_user():
                         user_name = user.get('update-name')
                         preferences = user.get('update-preferences')
                         user_id = user.get('user_id')
-                        
+
                         users_table.update_item(
                             Key={
                                 'user_id': str(user_id)

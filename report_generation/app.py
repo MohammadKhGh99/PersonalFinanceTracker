@@ -1,11 +1,5 @@
 import datetime
 import json
-from queue import Queue
-from time import sleep
-from tracemalloc import start
-import flask
-from flask import render_template, request, jsonify
-import uuid
 import boto3
 import os
 
@@ -73,13 +67,12 @@ def handle_user():
                         transactions = response['Items']
                         print('Generating report for user: ' + user_id)
                         # Generate report
-                        start_date = datetime.datetime.strptime(request.form["start_date"], "%Y-%m-%d")
-                        end_date = datetime.datetime.strptime(request.form["end_date"], "%Y-%m-%d")
+                        start_date = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+                        end_date = datetime.datetime.strptime(end_date, "%Y-%m-%d")
                         
                         # filter transactions that between start_date and end_date using dynamodb
                         transactions = [transaction for transaction in transactions if start_date <= datetime.datetime.strptime(transaction['trans_date'], "%Y-%m-%d") <= end_date]
                         
-                        report_format = request.form["report_format"]
                         if report_format == 'pdf':
                             # todo - Implement PDF report generation logic
                             return "PDF report generated successfully!"

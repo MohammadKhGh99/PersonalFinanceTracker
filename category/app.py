@@ -1,9 +1,4 @@
 import json
-from queue import Queue
-from time import sleep
-import flask
-from flask import render_template, request, jsonify
-import uuid
 import boto3
 import os
 

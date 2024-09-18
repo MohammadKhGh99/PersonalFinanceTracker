@@ -1,16 +1,9 @@
-import datetime
 import json
-from time import sleep
 import flask
 import boto3
-import sys
 import uuid
-from boto3.dynamodb.conditions import Key, Attr
-from flask import redirect, render_template, request, jsonify, url_for
-# from pymysql import connect
-from sqlalchemy.orm import DeclarativeBase, mapped_column, sessionmaker
-from sqlalchemy import (Column, String, Integer, JSON, ForeignKey, DateTime,
-                        create_engine, Float)
+from flask import render_template, request, jsonify
+
 
 app = flask.Flask(__name__)
 
