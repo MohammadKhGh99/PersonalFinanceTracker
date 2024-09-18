@@ -21,7 +21,12 @@ def handle_transaction():
      Handle transactions: record, get, update ,and delete.
     """
     while True:
-        response = sqs_client.receive_message(QueueUrl=queue_name, MaxNumberOfMessages=1, WaitTimeSeconds=5, MessageAttributeNames=['All'])
+        response = sqs_client.receive_message(
+            QueueUrl=queue_name, 
+            MaxNumberOfMessages=1, 
+            WaitTimeSeconds=5, 
+            MessageAttributeNames=['All']
+        )
         
         if 'Messages' in response:
             print('Receiving message')
@@ -34,7 +39,10 @@ def handle_transaction():
                         transaction = json.loads(message['Body'])
                         transactions_table.put_item(Item=transaction)
                         print('Transaction recorded')
-                        sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
                     except Exception as e:
                         print('ERROR while recording transaction: ' + str(e))
                         raise e
@@ -46,6 +54,10 @@ def handle_transaction():
                             Key={
                                 'transaction_id': transaction_id
                             }
+                        )
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
                         )
                         if 'Item' in response:
                             transaction = response['Item']
@@ -88,7 +100,10 @@ def handle_transaction():
                             ReturnValues='UPDATED_NEW'
                         )
                         print('Transaction updated')
-                        sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
                     except Exception as e:
                         print('ERROR while update transaction: ' + str(e))
                         raise e
@@ -103,7 +118,10 @@ def handle_transaction():
                             }
                         )
                         print('Transaction deleted')
-                        sqs_client.delete_message(QueueUrl=queue_name, ReceiptHandle=message['ReceiptHandle'])
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
                     except Exception as e:
                         print('ERROR while delete transaction: ' + str(e))
                         raise e

@@ -376,6 +376,58 @@ def create_category():
         return jsonify({'error': str(e)}), 400
     
 
+@app.route('/categories/<category_id>', methods=['GET'])
+def get_category(category_id):
+    """
+    Retrieve details of a specific category.
+    """
+    try:
+        print('Send message to get category')
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps({'category_id': str(category_id)}),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'get_category',
+                    'DataType': 'String'
+                }
+            }
+        )
+        print('Message sent to get category')
+        
+        while True:
+            # Poll the SQS queue for the response message
+            response = sqs_client.receive_message(
+                QueueUrl=transaction_queue_url,
+                MaxNumberOfMessages=1,
+                WaitTimeSeconds=10,
+                MessageAttributeNames=['All']
+            )
+
+            # Check if messages are received
+            if 'Messages' in response:
+                message = response['Messages'][0]
+                handle_type = message['MessageAttributes']['method_sender']['StringValue']
+                if handle_type == 'category/get_category':
+                    print('receive transaction details')
+                    category = json.loads(message['Body'])
+
+                    # Delete the message from the queue after processing
+                    sqs_client.delete_message(
+                        QueueUrl=transaction_queue_url,
+                        ReceiptHandle=message['ReceiptHandle']
+                    )
+                    # Check if the transaction is found
+                    if category:
+                        return render_template('category_service.html', category=category), 201
+                    else:
+                        return jsonify({'error': 'Transaction not found'}), 404        
+            else:
+                print('No messages in queue, retrying...')
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+
+
 @app.route('/categories', methods=['GET'])
 def get_categories():
     """

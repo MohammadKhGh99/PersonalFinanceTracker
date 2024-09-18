@@ -46,11 +46,47 @@ def handle_category():
                     except Exception as e:
                         print('ERROR while creating category: ' + str(e))
                         raise e
+                elif handle_type == 'get_category':
+                    print('Getting Category')
+                    try:
+                        category_id = json.loads(message['Body'])['category_id']
+                        response = categories_table.get_item(
+                            Key={
+                                'category_id': category_id
+                            }
+                        )
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
+                        if 'Item' in response:
+                            category = response['Item']
+                            sqs_client.send_message(
+                                QueueUrl=queue_name, 
+                                MessageBody=json.dumps(category),
+                                MessageAttributes={
+                                    'method_sender': {
+                                        'DataType': 'String',
+                                        'StringValue': 'category/get_category'
+                                    }
+                                }
+                            )
+                            print('category sent to display it to user')
+                            # sleep(10) 
+                        else:
+                            print('Category not found')
+                    except Exception as e:
+                        print('ERROR while get category: ' + str(e))
+                        raise e
                 elif handle_type == 'get_categories':
                     print('Getting All Categories')
                     try:
                         response = categories_table.scan()
                         categories = { i + 1: repr(response['Items'][i]) for i in range(len(response['Items']))}
+                        sqs_client.delete_message(
+                            QueueUrl=queue_name, 
+                            ReceiptHandle=message['ReceiptHandle']
+                        )
                         sqs_client.send_message(
                             QueueUrl=queue_name, 
                             MessageBody=json.dumps(categories),
