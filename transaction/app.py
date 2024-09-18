@@ -29,7 +29,7 @@ def handle_transaction():
         )
         
         if 'Messages' in response:
-            print('Receiving message')
+            print('Receiving message for transaction service')
             message = response['Messages'][0]
             if 'MessageAttributes' in message:
                 handle_type = message['MessageAttributes']['method_sender']['StringValue']

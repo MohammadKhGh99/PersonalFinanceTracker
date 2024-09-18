@@ -90,28 +90,36 @@ transaction_queue_url = 'https://sqs.us-east-1.amazonaws.com/593793064844/transa
 
 @app.route('/', methods=['GET'])
 def index():
+    """
+    Home page.
+    """
     return render_template('home.html')
 
 
 @app.route('/home', methods=['GET'])
 def home():
+    """
+    Home page.
+    """
     return render_template('home.html')
 
 
 @app.route('/users', methods=['GET'])
 def users_management():
+    """
+    Users management page.
+    """
     return render_template('users_management.html')
 
 
 # User Management Service
-@app.route('/users/register', methods=['GET', 'POST'])
+@app.route('/users/register', methods=['POST'])
 def register_user():
     """
     Register a new user.
     """
-    if request.method == 'GET':
-        return render_template('register_user.html')
     try:
+        print("Sending message from main to user to user SQS")
         primary_key = str(uuid.uuid4())
         new_user = {
             'user_id': primary_key,
@@ -119,8 +127,17 @@ def register_user():
             'user_name': request.form["register-name"],
             'preferences': request.form["register-preferences"]
         }
-        users_table.put_item(Item=new_user)
-        return render_template('users_management.html', alert_message='User created successfully')
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(new_user),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'register_user',
+                    'DataType': 'String'
+                }
+            }
+        )
+        print("Message sent to user SQS")
         return jsonify({'message': 'User created successfully',
                         'user_id': primary_key}), 201
     except Exception as e:
@@ -133,16 +150,48 @@ def get_user(user_id):
     Get user profile details.
     """
     try:
-        response = users_table.get_item(
-            Key={
-                'user_id': str(user_id)
+        print('Send message to get user')
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps({'user_id': str(user_id)}),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'get_user',
+                    'DataType': 'String'
+                }
             }
-        )
-        if 'Item' in response:
-            user = response['Item']
-            return render_template('users_management.html', user=user), 201
-        else:
-            return jsonify({'error': 'User not found'}), 404
+        )   
+        print('Message sent to get user')
+
+        while True:
+            # Poll the SQS queue for the response message
+            response = sqs_client.receive_message(
+                QueueUrl=transaction_queue_url,
+                MaxNumberOfMessages=1,
+                WaitTimeSeconds=10,
+                MessageAttributeNames=['All']
+            )
+
+            # Check if messages are received
+            if 'Messages' in response:
+                message = response['Messages'][0]
+                handle_type = message['MessageAttributes']['method_sender']['StringValue']
+                if handle_type == 'user/get_user':
+                    print('receive user details')
+                    user = json.loads(message['Body'])
+
+                    # Delete the message from the queue after processing
+                    sqs_client.delete_message(
+                        QueueUrl=transaction_queue_url,
+                        ReceiptHandle=message['ReceiptHandle']
+                    )
+                    # Check if the user is found
+                    if user:
+                        return render_template('users_management.html', user=user), 201
+                    else:
+                        return jsonify({'error': f'User [{user_id}] not found'}), 404
+            else:
+                print('No messages in queue, retrying...')
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
@@ -153,23 +202,20 @@ def update_user(user_id):
     Update user profile.
     """
     data = request.get_json()
-    email = data.get('update-email')
-    user_name = data.get('update-name')
-    preferences = data.get('update-preferences')
+    data['user_id'] = str(user_id)
 
     try:
-        users_table.update_item(
-            Key={
-                'user_id': str(user_id)
-            },
-            UpdateExpression='SET email = :e, user_name = :n, preferences = :p',
-            ExpressionAttributeValues={
-                ':e': email, ':n': user_name, ':p': preferences
-            },
-            ReturnValues='UPDATED_NEW'
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(data),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'update_user',
+                    'DataType': 'String'
+                }
+            }
         )
-
-        return jsonify({'message': 'User updated successfully'}), 201
+        return jsonify({'message': f'User [{user_id}] updated successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
@@ -180,12 +226,17 @@ def delete_user(user_id):
     Delete a user.
     """
     try:
-        users_table.delete_item(
-            Key={
-                'user_id': str(user_id)
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps({'user_id': str(user_id)}),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'delete_user',
+                    'DataType': 'String'
+                }
             }
         )
-        return jsonify({'message': 'User deleted successfully'})
+        return jsonify({'message': f'User [{user_id}] deleted successfully'})
     except Exception as e:
         return jsonify({'error': str(e)}), 400
     
@@ -204,6 +255,9 @@ def login_user():
 
 @app.route('/transactions', methods=['GET'])
 def transactions_management():
+    """
+    Transactions management page.
+    """
     return render_template('transactions_service.html')
 
 
@@ -341,6 +395,9 @@ def delete_transaction(transaction_id):
 
 @app.route('/category', methods=['GET'])
 def category_management():
+    """
+    Category management page.
+    """
     return render_template('category_service.html')
 
 
@@ -536,35 +593,29 @@ def generate_report():
     """
     Generate a report.
     """
+    try:
+        print("Sending message from main to report generation SQS")
+        report_details = {
+            'user_id': request.form["user_id"],
+            'start_date': request.form["start_date"],
+            'end_date': request.form["end_date"],
+            'report_format': request.form["report_format"]
+        }
+        sqs_client.send_message(
+            QueueUrl=transaction_queue_url,
+            MessageBody=json.dumps(report_details),
+            MessageAttributes={
+                'method_sender': {
+                    'StringValue': 'generate_report',
+                    'DataType': 'String'
+                }
+            }
+        )
+        print("Message sent to report SQS")
+        return jsonify({'message': 'Report generated successfully'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
 
-    # todo - Implement report generation logic
-    response = users_table.get_item(Key={'user_id': str(request.form["user_id"])})
-    if 'Item' not in response:
-        return jsonify({'error': 'User not found'}), 404
-    user = response['Item']
-
-    response = transactions_table.scan(FilterExpression=Attr('user_id').eq(user['user_id']))
-    transactions = response['Items']
-
-    start_date = datetime.datetime.strptime(request.form["start_date"], "%Y-%m-%d")
-    end_date = datetime.datetime.strptime(request.form["end_date"], "%Y-%m-%d")
-    
-    # filter transactions that between start_date and end_date using dynamodb
-    transactions = [transaction for transaction in transactions if start_date <= datetime.datetime.strptime(transaction['trans_date'], "%Y-%m-%d") <= end_date]
-    
-    report_format = request.form["report_format"]
-    if report_format == 'pdf':
-        # todo - Implement PDF report generation logic
-        return "PDF report generated successfully!"
-    elif report_format == 'csv':
-        # todo - Implement CSV report generation logic
-        return "CSV report generated successfully!"
-    elif report_format == 'excel':
-        # todo - Implement Excel report generation logic
-        return "Excel report generated successfully!"
-    else:
-        return "Invalid report format. Please use either 'csv', 'pdf' or 'excel'."
-    
 
 # Notification Service
 
