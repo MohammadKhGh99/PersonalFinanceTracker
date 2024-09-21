@@ -3,7 +3,7 @@ import boto3
 import os
 
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 categories_table = dynamodb.Table('categories') # type: ignore
 sqs_client = boto3.client('sqs', region_name='us-east-1')
 
