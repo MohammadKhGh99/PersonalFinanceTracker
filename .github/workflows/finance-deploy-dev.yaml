@@ -37,11 +37,7 @@ jobs:
       - name: Check if app.py was modified
         id: finance_tracker_changes
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py'; then
-            echo "app.py was modified"
-          else
-            echo "no-match"
-          fi
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' || echo "no-match"
 
       - name: Build and push image if app.py was modified
         if: steps.finance_tracker_changes.outputs.result != 'no-match'
@@ -57,7 +53,7 @@ jobs:
       - name: Check if category/ was modified
         id: category_changes
         run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/category/' || echo "no-match"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/category/' || echo "no-match"
 
       - name: Build and push image if category/ was modified
         if: steps.category_changes.outputs.result != 'no-match'
@@ -73,7 +69,7 @@ jobs:
       - name: Check if transaction/ was modified
         id: transaction_changes
         run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/transaction/' || echo "no-match"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/transaction/' || echo "no-match"
 
       - name: Build and push image if transaction/ was modified
         if: steps.transaction_changes.outputs.result != 'no-match'
@@ -89,7 +85,7 @@ jobs:
       - name: Check if users/ was modified
         id: users_changes
         run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/users/' || echo "no-match"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/users/' || echo "no-match"
       
       - name: Build and push image if users/ was modified
         if: steps.users_changes.outputs.result != 'no-match'
@@ -105,7 +101,7 @@ jobs:
       - name: Check if reports/ was modified
         id: reports_changes
         run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/reports/' || echo "no-match"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/reports/' || echo "no-match"
       
       - name: Build and push image if reports/ was modified
         if: steps.reports_changes.outputs.result != 'no-match'
