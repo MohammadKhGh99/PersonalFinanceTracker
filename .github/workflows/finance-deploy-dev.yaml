@@ -24,7 +24,7 @@ jobs:
         git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' || echo "no-match"
     
     - name: Conditional step if app.py is changed
-      if: steps.changes.outputs.result != 'no-match'
+      if: steps.changes.outputs.result == 'no-match'
       run: echo "PersonalFinanceTracker/app.py was modified!"
 
 # jobs:
