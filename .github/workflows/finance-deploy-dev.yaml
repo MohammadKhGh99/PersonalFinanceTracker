@@ -9,7 +9,6 @@ env:
   SQS_QUEUE_NAME: ${{ secrets.SQS_QUEUE_NAME }}
 
 
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,19 +26,92 @@ jobs:
       if: steps.changes.outputs.result == 'no-match'
       run: echo "PersonalFinanceTracker/app.py was modified!"
 
-# jobs:
-#   FinanceBuild:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout the repo code
-#         uses: actions/checkout@v2
+jobs:
+  FinanceBuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo code
+        uses: actions/checkout@v2
 
-#       - name: Build and push image
-#         run: |
-#           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+      # finance_tracker
+      - name: Check if app.py was modified
+        id: finance_tracker_changes
+        run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' || echo "no-match"
 
-#           IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
-#           docker build -t $IMAGE_NAME .
-#           docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
-#           docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+      - name: Build and push image if app.py was modified
+        if: steps.finance_tracker_changes.outputs.result != 'no-match'
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+
+      # category_service
+      - name: Check if category/ was modified
+        id: category_changes
+        run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/category/' || echo "no-match"
+
+      - name: Build and push image if category/ was modified
+        if: steps.category_changes.outputs.result != 'no-match'
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          IMAGE_NAME=finance_tracker_category_service:0.0.${{ github.run_number }}
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+
+      # transaction_service
+      - name: Check if transaction/ was modified
+        id: transaction_changes
+        run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/transaction/' || echo "no-match"
+
+      - name: Build and push image if transaction/ was modified
+        if: steps.transaction_changes.outputs.result != 'no-match'
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          IMAGE_NAME=finance_tracker_transaction_service:0.0.${{ github.run_number }}
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+      
+      # users_management_service
+      - name: Check if users/ was modified
+        id: users_changes
+        run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/users/' || echo "no-match"
+      
+      - name: Build and push image if users/ was modified
+        if: steps.users_changes.outputs.result != 'no-match'
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          IMAGE_NAME=finance_tracker_users_service:0.0.${{ github.run_number }}
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+      
+      # reports_service
+      - name: Check if reports/ was modified
+        id: reports_changes
+        run: |
+        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/reports/' || echo "no-match"
+      
+      - name: Build and push image if reports/ was modified
+        if: steps.reports_changes.outputs.result != 'no-match'
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
+          IMAGE_NAME=finance_tracker_reports_service:0.0.${{ github.run_number }}
+          docker build -t $IMAGE_NAME .
+          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+
+      
           
