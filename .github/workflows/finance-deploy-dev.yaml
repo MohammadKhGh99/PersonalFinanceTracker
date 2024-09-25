@@ -21,8 +21,7 @@ jobs:
       # finance_tracker
       - name: Build and push image if app.py was modified
         run: |
-          OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' | grep 'PersonalFinanceTracker/app.py' || echo "no-match")
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
+          OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -w 'app.py' | grep 'PersonalFinanceTracker/app.py' || echo "no-match")
           echo "OUTPUT: $OUTPUT"
           if [ "$OUTPUT" != "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
