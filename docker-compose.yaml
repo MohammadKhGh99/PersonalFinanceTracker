@@ -1,0 +1,31 @@
+services:
+  finance_tracker:
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker:0.0.${{ github.run_number }}
+    ports:
+      - "5000:5000"
+    environment:
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+
+  category_service:
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:0.0.${{ github.run_number }}
+    environment:
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+
+  transaction_service:
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_transaction_service:0.0.${{ github.run_number }}
+    environment:
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+
+  users_management_service:
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_users_service:0.0.${{ github.run_number }}
+    environment:
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+
+  reports_service:
+    image: ${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_reports_service:0.0.${{ github.run_number }}
+    environment:
+      - SQS_QUEUE_NAME=${SQS_QUEUE_NAME}
+
+networks:
+  default:
+    driver: bridge
