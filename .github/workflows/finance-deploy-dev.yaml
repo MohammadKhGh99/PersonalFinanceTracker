@@ -8,6 +8,7 @@ on:
 env:
   SQS_QUEUE_NAME: ${{ secrets.SQS_QUEUE_NAME }}
 
+
 jobs:
   FinanceBuild:
     runs-on: ubuntu-latest
