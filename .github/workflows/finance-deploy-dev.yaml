@@ -8,24 +8,6 @@ on:
 env:
   SQS_QUEUE_NAME: ${{ secrets.SQS_QUEUE_NAME }}
 
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Check if app.py was modified
-      id: changes
-      run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' || echo "no-match"
-    
-    - name: Conditional step if app.py is changed
-      if: steps.changes.outputs.result == 'no-match'
-      run: echo "PersonalFinanceTracker/app.py was modified!"
-
 jobs:
   FinanceBuild:
     runs-on: ubuntu-latest
