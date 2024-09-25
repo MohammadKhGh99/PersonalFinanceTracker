@@ -28,6 +28,9 @@ jobs:
             docker build -t $IMAGE_NAME .
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+            echo "Docker image pushed successfully."
+          else
+            echo "No changes detected in PersonalFinanceTracker/app.py. Skipping Docker build."
           fi
 
       # # category_service
