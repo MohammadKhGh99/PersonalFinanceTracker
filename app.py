@@ -12,7 +12,6 @@ sqs_client = boto3.client('sqs', region_name='us-east-1')
 transaction_queue_url = os.environ['SQS_QUEUE_NAME']
 
 
-
 @app.route('/', methods=['GET'])
 def index():
     """
