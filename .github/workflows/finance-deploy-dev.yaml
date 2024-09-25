@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout the repo code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
 
       # finance_tracker
       - name: Check if app.py was modified
