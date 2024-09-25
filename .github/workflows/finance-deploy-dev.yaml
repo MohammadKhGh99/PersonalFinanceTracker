@@ -25,7 +25,7 @@ jobs:
       - name: Build and push image if app.py was modified
         if: steps.finance_tracker_changes.outputs.result != 'no-match'
         run: |
-          echo ${{steps.finance_tracker_changes.outputs.result}}
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }}
           docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
           IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
