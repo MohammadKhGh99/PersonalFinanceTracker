@@ -37,11 +37,11 @@ jobs:
       - name: Check if app.py was modified
         id: finance_tracker_changes
         run: |
-        git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py'; then
-          echo "app.py was modified"
-        else
-          echo "no-match"
-        fi
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py'; then
+            echo "app.py was modified"
+          else
+            echo "no-match"
+          fi
 
       - name: Build and push image if app.py was modified
         if: steps.finance_tracker_changes.outputs.result != 'no-match'
