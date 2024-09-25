@@ -19,21 +19,16 @@ jobs:
           fetch-depth: 0  # Fetch all history for all branches and tags
 
       # finance_tracker
-      - name: Check if app.py was modified
-        id: finance_tracker_changes
-        run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py' || echo "no-match"
-
       - name: Build and push image if app.py was modified
-        if: steps.finance_tracker_changes.outputs.result != 'no-match'
         run: |
-          echo ${{ steps.finance_tracker_changes.outputs }}
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'PersonalFinanceTracker/app.py'; then
+            docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
-          IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
-          docker build -t $IMAGE_NAME .
-          docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+            IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
+            docker build -t $IMAGE_NAME .
+            docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+            docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
+          fi
 
       # # category_service
       # - name: Check if category/ was modified
