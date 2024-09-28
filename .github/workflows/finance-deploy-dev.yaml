@@ -23,7 +23,7 @@ jobs:
         run: |
           OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -w 'app.py' | grep 'PersonalFinanceTracker/app.py' || echo "no-match")
           echo "OUTPUT: $OUTPUT"
-          if [ "$OUTPUT" != "no-match" ]; then
+          if [ "$OUTPUT" == "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
             IMAGE_NAME=finance_tracker:0.0.${{ github.run_number }}
@@ -42,7 +42,7 @@ jobs:
       - name: Check if category/ was modified
         run: |
           OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'category/' || echo "no-match")
-          if [ "$OUTPUT" != "no-match" ]; then
+          if [ "$OUTPUT" == "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
             IMAGE_NAME=finance_tracker_category_service:0.0.${{ github.run_number }}
@@ -61,7 +61,7 @@ jobs:
       - name: Check if transaction/ was modified
         run: |
           OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'transaction/' || echo "no-match")
-          if [ "$OUTPUT" != "no-match" ]; then
+          if [ "$OUTPUT" == "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
           
             IMAGE_NAME=finance_tracker_transaction_service:0.0.${{ github.run_number }}
@@ -81,7 +81,7 @@ jobs:
         run: |
           OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'users/' || echo "no-match")
 
-          if [ "$OUTPUT" != "no-match" ]; then
+          if [ "$OUTPUT" == "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
             IMAGE_NAME=finance_tracker_users_service:0.0.${{ github.run_number }}
@@ -100,7 +100,7 @@ jobs:
       - name: Check if reports/ was modified
         run: |
           OUTPUT=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep 'reports/' || echo "no-match")
-          if [ "$OUTPUT" != "no-match" ]; then
+          if [ "$OUTPUT" == "no-match" ]; then
             docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
             IMAGE_NAME=finance_tracker_reports_service:0.0.${{ github.run_number }}
@@ -115,39 +115,39 @@ jobs:
           sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_reports_service:.*|$IMAGE_NAME|" k8s/reports-service-deployment.yaml
           echo "Updated reports-service-deployment.yaml successfully."
 
-  FinanceDeploy:
-    runs-on: ubuntu-latest
-    needs: FinanceBuild
-    steps:
-      - name: Checkout the repo code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+  # FinanceDeploy:
+  #   runs-on: ubuntu-latest
+  #   needs: FinanceBuild
+  #   steps:
+  #     - name: Checkout the repo code
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0  # Fetch all history for all branches and tags
 
-      - name: Deploy finance_tracker
-        run: |
-          kubectl apply -f k8s/finance-tracker-deployment.yaml
-          echo "Finance Tracker deployed successfully."
+  #     - name: Deploy finance_tracker
+  #       run: |
+  #         kubectl apply -f k8s/finance-tracker-deployment.yaml
+  #         echo "Finance Tracker deployed successfully."
 
-      - name: Deploy category_service
-        run: |
-          kubectl apply -f k8s/category-service-deployment.yaml
-          echo "Category Service deployed successfully."
+  #     - name: Deploy category_service
+  #       run: |
+  #         kubectl apply -f k8s/category-service-deployment.yaml
+  #         echo "Category Service deployed successfully."
 
-      - name: Deploy transaction_service
-        run: |
-          kubectl apply -f k8s/transaction-service-deployment.yaml
-          echo "Transaction Service deployed successfully."
+  #     - name: Deploy transaction_service
+  #       run: |
+  #         kubectl apply -f k8s/transaction-service-deployment.yaml
+  #         echo "Transaction Service deployed successfully."
 
-      - name: Deploy users_management_service
-        run: |
-          kubectl apply -f k8s/users-service-deployment.yaml
-          echo "Users Management Service deployed successfully."
+  #     - name: Deploy users_management_service
+  #       run: |
+  #         kubectl apply -f k8s/users-service-deployment.yaml
+  #         echo "Users Management Service deployed successfully."
 
-      - name: Deploy reports_service
-        run: |
-          kubectl apply -f k8s/reports-service-deployment.yaml
-          echo "Reports Service deployed successfully."
+  #     - name: Deploy reports_service
+  #       run: |
+  #         kubectl apply -f k8s/reports-service-deployment.yaml
+  #         echo "Reports Service deployed successfully."
 
       
           
