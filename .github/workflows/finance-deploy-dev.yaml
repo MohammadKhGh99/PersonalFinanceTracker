@@ -60,6 +60,7 @@ jobs:
 
             sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
             echo "Updated category-service-deployment.yaml successfully."
+            cat k8s/category-service-deployment.yaml
 
             git config --global user.name "github-actions[bot]"
             git config --global user.email "github-actions[bot]@users.noreply.github.com"
