@@ -31,12 +31,13 @@ jobs:
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
+
+            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker:.*|$IMAGE_NAME|" k8s/finance-tracker-deployment.yaml
+            echo "Updated finance-tracker-deployment.yaml successfully."
           else
             echo "No changes detected in PersonalFinanceTracker/app.py. Skipping Docker build."
           fi
 
-          sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker:.*|$IMAGE_NAME|" k8s/finance-tracker-deployment.yaml
-          echo "Updated finance-tracker-deployment.yaml successfully."
 
       # category_service
       - name: Check if category/ was modified
@@ -50,12 +51,13 @@ jobs:
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
+
+            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
+            echo "Updated category-service-deployment.yaml successfully."
           else
             echo "No changes detected in category. Skipping Docker build."
           fi
 
-          sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
-          echo "Updated category-service-deployment.yaml successfully."
 
       # transaction_service
       - name: Check if transaction/ was modified
@@ -69,12 +71,13 @@ jobs:
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
+
+            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_transaction_service:.*|$IMAGE_NAME|" k8s/transaction-service-deployment.yaml
+            echo "Updated transaction-service-deployment.yaml successfully."
           else
             echo "No changes detected in transaction/. Skipping Docker build."
           fi
 
-          sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_transaction_service:.*|$IMAGE_NAME|" k8s/transaction-service-deployment.yaml
-          echo "Updated transaction-service-deployment.yaml successfully."
       
       # users_management_service
       - name: Check if users/ was modified
@@ -89,12 +92,13 @@ jobs:
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
+
+            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_users_service:.*|$IMAGE_NAME|" k8s/users-service-deployment.yaml
+            echo "Updated users-service-deployment.yaml successfully."
           else
             echo "No changes detected in users/. Skipping Docker build."
           fi
 
-          sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_users_service:.*|$IMAGE_NAME|" k8s/users-service-deployment.yaml
-          echo "Updated users-service-deployment.yaml successfully."
       
       # reports_service
       - name: Check if reports/ was modified
@@ -108,12 +112,13 @@ jobs:
             docker tag $IMAGE_NAME ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
+
+            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_reports_service:.*|$IMAGE_NAME|" k8s/reports-service-deployment.yaml
+            echo "Updated reports-service-deployment.yaml successfully."
           else
             echo "No changes detected in reports/. Skipping Docker build."
           fi
 
-          sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_reports_service:.*|$IMAGE_NAME|" k8s/reports-service-deployment.yaml
-          echo "Updated reports-service-deployment.yaml successfully."
 
   # FinanceDeploy:
   #   runs-on: ubuntu-latest
