@@ -32,7 +32,7 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
 
-            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker:.*|$IMAGE_NAME|" k8s/finance-tracker-deployment.yaml
+            sed -i "s|finance_tracker:.*|$IMAGE_NAME|" k8s/finance-tracker-deployment.yaml
             echo "Updated finance-tracker-deployment.yaml successfully."
             cat k8s/finance-tracker-deployment.yaml
 
@@ -59,7 +59,7 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
 
-            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
+            sed -i "s|finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
             echo "Updated category-service-deployment.yaml successfully."
 
             git config --global user.name "github-actions[bot]"
@@ -85,7 +85,7 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
 
-            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_transaction_service:.*|$IMAGE_NAME|" k8s/transaction-service-deployment.yaml
+            sed -i "s|finance_tracker_transaction_service:.*|$IMAGE_NAME|" k8s/transaction-service-deployment.yaml
             echo "Updated transaction-service-deployment.yaml successfully."
 
             git config --global user.name "github-actions[bot]"
@@ -112,7 +112,7 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
 
-            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_users_service:.*|$IMAGE_NAME|" k8s/users-service-deployment.yaml
+            sed -i "s|finance_tracker_users_service:.*|$IMAGE_NAME|" k8s/users-service-deployment.yaml
             echo "Updated users-service-deployment.yaml successfully."
 
             git config --global user.name "github-actions[bot]"
@@ -138,7 +138,7 @@ jobs:
             docker push ${{ secrets.DOCKERHUB_USERNAME }}/$IMAGE_NAME
             echo "Docker image pushed successfully."
 
-            sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_reports_service:.*|$IMAGE_NAME|" k8s/reports-service-deployment.yaml
+            sed -i "s|finance_tracker_reports_service:.*|$IMAGE_NAME|" k8s/reports-service-deployment.yaml
             echo "Updated reports-service-deployment.yaml successfully."
 
             git config --global user.name "github-actions[bot]"
