@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: category  # Name of the container
-        image: mohammadgh99/finance_tracker_category_service:0.0.52
+        image: mohammadgh99/finance_tracker_category_service:0.0.53
         
 ---
 apiVersion: v1  # Version of the Kubernetes API
