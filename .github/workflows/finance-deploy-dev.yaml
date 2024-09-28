@@ -53,6 +53,7 @@ jobs:
             echo "Docker image pushed successfully."
 
             sed -i "s|${{ secrets.DOCKERHUB_USERNAME }}/finance_tracker_category_service:.*|$IMAGE_NAME|" k8s/category-service-deployment.yaml
+            cat k8s/category-service-deployment.yaml
             echo "Updated category-service-deployment.yaml successfully."
           else
             echo "No changes detected in category. Skipping Docker build."
