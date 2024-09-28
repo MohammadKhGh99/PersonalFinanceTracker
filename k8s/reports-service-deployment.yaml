@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: reports  # Name of the container
-        image: mohammadgh99/finance_tracker_reports_service:0.0.2  # Docker image to use for the container
+        image: mohammadgh99/finance_tracker_reports_service:0.0.52
         
 ---
 apiVersion: v1  # Version of the Kubernetes API
