@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'general'
+    }
 
     triggers {
         githubPush()
@@ -23,9 +25,10 @@ pipeline {
     stages { 
         stage('Docker setup') {
             steps {
-                sh '''
-                  docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
-                '''
+                script {
+                withCredentials([string(credentialsId: 'docker_hub_password', variable: 'DOCKER_CREDS_PSW')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USERNAME --password-stdin'
+}               }
             }
         }
 
