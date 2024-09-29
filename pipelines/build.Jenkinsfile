@@ -25,10 +25,9 @@ pipeline {
     stages { 
         stage('Docker setup') {
             steps {
-                script {
-                withCredentials([string(credentialsId: 'docker_hub_password', variable: 'DOCKER_CREDS_PSW')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USERNAME --password-stdin'
-}               }
+                sh '''
+                  docker login -u $DOCKER_USERNAME -p $DOCKER_PASS
+                '''
             }
         }
 
