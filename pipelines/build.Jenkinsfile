@@ -18,7 +18,7 @@ pipeline {
         DOCKER_USERNAME = "${DOCKER_CREDS_USR}"  // The _USR suffix added to access the username value
         DOCKER_PASS = "${DOCKER_CREDS_PSW}"      // The _PSW suffix added to access the password value
         SERVICES_TO_DEPLOY = ""
-        ALL_SERVICES = "finance-tracker,category-service,transaction-service,users-service,reports-service"
+        ALL_SERVICES = "finance-tracker-frontend,category-service,transaction-service,users-service,reports-service"
     }
 
     stages { 
@@ -46,9 +46,10 @@ pipeline {
                             images.add(image)
 
                             sh """
-                              ls
+                              cd ${service}
                               docker build -t ${image} .
                               docker push ${image}
+                              cd ..
                             """
                         }
                     }
