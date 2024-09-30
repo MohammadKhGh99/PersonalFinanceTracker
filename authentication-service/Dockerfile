@@ -3,6 +3,6 @@ WORKDIR /app
 RUN pip install --upgrade pip
 COPY ../requirements.txt .
 RUN pip install -r requirements.txt
-COPY authentication_authorization/ .
+COPY authentication-service/ .
 
 CMD ["python3", "app.py"]

@@ -3,6 +3,6 @@ WORKDIR /app
 RUN pip install --upgrade pip
 COPY ../requirements.txt .
 RUN pip install -r requirements.txt
-COPY category/ .
+COPY reports-service/ .
 
 CMD ["python3", "app.py"]

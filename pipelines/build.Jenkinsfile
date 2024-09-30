@@ -14,12 +14,11 @@ pipeline {
 
     environment {
         IMAGE_TAG = "0.0.$BUILD_NUMBER"
-        IMAGE_BASE_NAME = "finance_tracker"
-
         DOCKER_CREDS = credentials('dockerhub')
         DOCKER_USERNAME = "${DOCKER_CREDS_USR}"  // The _USR suffix added to access the username value
         DOCKER_PASS = "${DOCKER_CREDS_PSW}"      // The _PSW suffix added to access the password value
-        IMAGE_FULL_NAME="$DOCKER_USERNAME/$IMAGE_BASE_NAME:$IMAGE_TAG"
+        SERVICES_TO_DEPLOY = ""
+        ALL_SERVICES = ["finance-tracker", "category-service", "transaction-service", "users-service", "reports-service"]
     }
 
     stages { 
@@ -31,22 +30,39 @@ pipeline {
             }
         }
 
-        stage('Build & Push') {
+        stage('Check for Modifications') {
             steps {
-                sh '''
-                  docker build -t $IMAGE_FULL_NAME .
-                  docker push $IMAGE_FULL_NAME
-                '''
-                echo "Docker image pushed successfully."
+                script {
+                    def modifiedFiles = sh(script: "git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT", returnStdout: true).trim().split('\n')
+                    def services = []
+
+                    for (service in ALL_SERVICES) {
+                        if (modifiedFiles.any { it.startsWith("${service}/") }) {
+                            services.add(service)
+                            sh '''
+                              docker build -t $DOCKER_USERNAME/${service}:$IMAGE_TAG ${service}/
+                              docker push $DOCKER_USERNAME/${service}:$IMAGE_TAG
+                            '''
+                        }
+                    }
+
+                    env.SERVICES_TO_DEPLOY = services.join(',')
+                }
             }
         }
 
         stage('Trigger Deploy') {
             steps {
-                build job: 'FinanceTrackerDeploy', wait: false, parameters: [
-                    string(name: 'SERVICE_NAME', value: "FinanceTracker"),
-                    string(name: 'IMAGE_FULL_NAME_PARAM', value: "${IMAGE_FULL_NAME}")
-                ]
+                script {
+                    if (env.SERVICES_TO_DEPLOY) {
+                        build job: 'FinanceTrackerDeploy', wait: false, parameters: [
+                            string(name: 'SERVICE_NAMES', value: env.SERVICES_TO_DEPLOY),
+                            string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                        ]
+                    } else {
+                        echo "No services to deploy."
+                    }
+                }
             }
         }
     }

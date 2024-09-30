@@ -3,6 +3,6 @@ WORKDIR /app
 RUN pip install --upgrade pip
 COPY ../requirements.txt .
 RUN pip install -r requirements.txt
-COPY report_generation/ .
+COPY finance-tracker-frontend/ .
 
 CMD ["python3", "app.py"]
