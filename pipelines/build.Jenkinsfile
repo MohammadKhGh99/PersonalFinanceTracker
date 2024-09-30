@@ -35,17 +35,23 @@ pipeline {
                 script {
                     def modifiedFiles = sh(script: "git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT", returnStdout: true).trim().split('\n')
                     def services = []
+                    def images = []
 
                     for (service in ALL_SERVICES) {
                         if (modifiedFiles.any { it.startsWith("${service}/") }) {
+                            def image = "${DOCKER_USERNAME}/${service}:${IMAGE_TAG}"
+                            
                             services.add(service)
+                            images.add(image)
+
                             sh '''
-                              docker build -t $DOCKER_USERNAME/${service}:$IMAGE_TAG ${service}/
-                              docker push $DOCKER_USERNAME/${service}:$IMAGE_TAG
+                              docker build -t ${image} ${service}/
+                              docker push ${image}
                             '''
                         }
                     }
 
+                    env.IMAGES = images.join(',')
                     env.SERVICES_TO_DEPLOY = services.join(',')
                 }
             }
@@ -57,7 +63,7 @@ pipeline {
                     if (env.SERVICES_TO_DEPLOY) {
                         build job: 'FinanceTrackerDeploy', wait: false, parameters: [
                             string(name: 'SERVICE_NAMES', value: env.SERVICES_TO_DEPLOY),
-                            string(name: 'IMAGE_TAG', value: IMAGE_TAG)
+                            string(name: 'IMAGE_FULL_NAMES', value: env.IMAGES)
                         ]
                     } else {
                         echo "No services to deploy."
