@@ -9,7 +9,7 @@ from flask import render_template, request, jsonify
 app = flask.Flask(__name__)
 
 sqs_client = boto3.client('sqs', region_name='us-east-1')
-transaction_queue_url = os.environ['SQS_QUEUE_NAME']
+transaction_queue_url = os.environ['SQS_QUEUE_NAME'] 
 
 
 @app.route('/', methods=['GET'])
