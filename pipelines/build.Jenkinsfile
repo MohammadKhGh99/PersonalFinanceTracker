@@ -45,11 +45,11 @@ pipeline {
                             services.add(service)
                             images.add(image)
 
-                            sh '''
+                            sh """
                               echo ${DOCKER_USERNAME}/${service}:${IMAGE_TAG}
                               docker build -t ${image} ${service}/
                               docker push ${image}
-                            '''
+                            """
                         }
                     }
 
