@@ -18,7 +18,7 @@ pipeline {
         DOCKER_USERNAME = "${DOCKER_CREDS_USR}"  // The _USR suffix added to access the username value
         DOCKER_PASS = "${DOCKER_CREDS_PSW}"      // The _PSW suffix added to access the password value
         SERVICES_TO_DEPLOY = ""
-        ALL_SERVICES = ["finance-tracker", "category-service", "transaction-service", "users-service", "reports-service"]
+        ALL_SERVICES = "finance-tracker,category-service,transaction-service,users-service,reports-service"
     }
 
     stages { 
@@ -33,11 +33,12 @@ pipeline {
         stage('Check for Modifications') {
             steps {
                 script {
+                    def all_services = ALL_SERVICES.split(',')
                     def modifiedFiles = sh(script: "git diff --name-only $GIT_PREVIOUS_COMMIT $GIT_COMMIT", returnStdout: true).trim().split('\n')
                     def services = []
                     def images = []
 
-                    for (service in ALL_SERVICES) {
+                    for (service in all_services) {
                         if (modifiedFiles.any { it.startsWith("${service}/") }) {
                             def image = "${DOCKER_USERNAME}/${service}:${IMAGE_TAG}"
                             
