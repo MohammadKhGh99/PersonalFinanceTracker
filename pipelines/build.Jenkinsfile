@@ -46,6 +46,7 @@ pipeline {
                             images.add(image)
 
                             sh '''
+                              echo ${DOCKER_USERNAME}/${service}:${IMAGE_TAG}
                               docker build -t ${image} ${service}/
                               docker push ${image}
                             '''
