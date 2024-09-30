@@ -54,8 +54,10 @@ pipeline {
                         }
                     }
 
-                    env.IMAGES = images.join(',')
-                    env.SERVICES_TO_DEPLOY = services.join(',')
+                    withEnv(["SERVICES_TO_DEPLOY=${services.join(',')}", "IMAGES=${images.join(',')}"]) {
+                        echo "Services to deploy: ${env.SERVICES_TO_DEPLOY}"
+                        echo "Images: ${env.IMAGES}"
+                    }
                 }
             }
         }
