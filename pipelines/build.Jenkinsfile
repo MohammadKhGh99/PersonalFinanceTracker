@@ -1,10 +1,4 @@
-checkout([$class: 'GitSCM', 
-   branches: [[name: 'main']], 
-   doGenerateSubmoduleConfigurations: false, 
-   extensions: [[$class: 'CloneOption', timeout: 60]], // Timeout in minutes
-   submoduleCfg: [], 
-   userRemoteConfigs: [[url: 'https://github.com/MohammadKhGh99/PersonalFinanceTracker']]
-])
+
 
 
 pipeline {
@@ -31,6 +25,17 @@ pipeline {
     }
 
     stages { 
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', 
+                    branches: [[name: 'main']], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [[$class: 'CloneOption', timeout: 60]], // Timeout in minutes
+                    submoduleCfg: [], 
+                    userRemoteConfigs: [[url: 'https://github.com/MohammadKhGh99/PersonalFinanceTracker']]
+                ])
+            }
+        }
         stage('Docker setup') {
             steps {
                 sh '''
