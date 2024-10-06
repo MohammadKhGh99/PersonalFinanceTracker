@@ -1,3 +1,12 @@
+checkout([$class: 'GitSCM', 
+   branches: [[name: 'main']], 
+   doGenerateSubmoduleConfigurations: false, 
+   extensions: [[$class: 'CloneOption', timeout: 60]], // Timeout in minutes
+   submoduleCfg: [], 
+   userRemoteConfigs: [[url: 'https://github.com/MohammadKhGh99/PersonalFinanceTracker']]
+])
+
+
 pipeline {
     agent {
         label 'general'
