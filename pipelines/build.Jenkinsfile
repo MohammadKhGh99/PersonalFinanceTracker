@@ -24,7 +24,14 @@ pipeline {
         ALL_SERVICES = "finance-tracker-frontend,category-service,transaction-service,users-service,reports-service"
     }
 
-    stages { 
+    stages {
+        stage('buffer')  {
+            steps {
+                script {
+                    sh 'git config --global http.postBuffer 524288000'
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout([$class: 'GitSCM', 
@@ -34,6 +41,13 @@ pipeline {
                     submoduleCfg: [], 
                     userRemoteConfigs: [[url: 'https://github.com/MohammadKhGh99/PersonalFinanceTracker']]
                 ])
+            }
+        }
+        stage('Retry') {
+            steps {
+                retry(3) { // Retries up to 3 times
+                    checkout scm
+                }
             }
         }
         stage('Docker setup') {
