@@ -30,7 +30,6 @@ pipeline {
             }
         }
 
-
         stage('Check for Modifications') {
             steps {
                 script {
